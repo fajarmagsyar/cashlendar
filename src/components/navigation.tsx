@@ -8,7 +8,7 @@ import {todayJakarta,validDate,getMonthRange} from '@/lib/finance/dates';
 import type {Account,Category} from '@/lib/finance/types';
 const links:{href:string;name:string;icon:IconName}[]=[
   {href:'/',name:'Calendar',icon:'calendar'},{href:'/?view=charts',name:'Charts',icon:'chart'},{href:'/?view=list',name:'List',icon:'list'},
-  {href:'/accounts',name:'Accounts',icon:'wallet'},{href:'/savings',name:'Savings',icon:'savings'},{href:'/family',name:'Family',icon:'family'}
+  {href:'/accounts',name:'Accounts',icon:'wallet'},{href:'/savings',name:'Savings',icon:'savings'},{href:'/profile',name:'Profile',icon:'profile'}
 ];
 export function Navigation({accounts,categories}:{accounts:Account[];categories:Category[]}) {
   const path=usePathname(),router=useRouter(),params=useSearchParams();
@@ -22,7 +22,7 @@ export function Navigation({accounts,categories}:{accounts:Account[];categories:
     document.addEventListener('visibilitychange',refresh);window.addEventListener('online',refresh);
     return ()=>{document.removeEventListener('visibilitychange',refresh);window.removeEventListener('online',refresh);};
   },[router]);
-  const active=(link:typeof links[number])=>link.href.startsWith('/?') ? path==='/' && view===new URLSearchParams(link.href.split('?')[1]).get('view') : link.href==='/' ? path==='/' && view==='calendar' : path===link.href;
+  const active=(link:typeof links[number])=>link.href.startsWith('/?') ? path==='/' && view===new URLSearchParams(link.href.split('?')[1]).get('view') : link.href==='/' ? path==='/' && view==='calendar' : link.href==='/profile' ? ['/profile','/settings','/family'].includes(path) : path===link.href;
   const desktopHref=(link:typeof links[number])=>{
     if(!link.href.startsWith('/?') && link.href!=='/') return link.href;
     const next=new URLSearchParams(path==='/' ? params.toString() : '');next.set('view',link.name==='Charts' ? 'charts' : link.name==='List' ? 'list' : 'calendar');next.delete('page');
@@ -34,7 +34,7 @@ export function Navigation({accounts,categories}:{accounts:Account[];categories:
       <Link href="/" className={path==='/' ? 'active' : ''} aria-current={path==='/' ? 'page' : undefined}><Icon name="calendar"/><span>Money</span></Link>
       <Link href="/accounts" className={path==='/accounts' ? 'active' : ''} aria-current={path==='/accounts' ? 'page' : undefined}><Icon name="wallet"/><span>Accounts</span></Link>
       <EntryButton accounts={accounts} categories={categories} date={date} iconOnly className="nav-add"/>
-      {links.slice(4).map(link=><Link key={link.href} href={link.href} className={path===link.href ? 'active' : ''} aria-current={path===link.href ? 'page' : undefined}><Icon name={link.icon}/><span>{link.name}</span></Link>)}
+      {links.slice(4).map(link=><Link key={link.href} href={link.href} className={active(link) ? 'active' : ''} aria-current={active(link) ? 'page' : undefined}><Icon name={link.icon}/><span>{link.name}</span></Link>)}
     </nav>
   </>;
 }

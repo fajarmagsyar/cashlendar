@@ -73,7 +73,7 @@ test('all navigation destinations remain accessible in the floating phone dock',
   await page.setViewportSize({width:320,height:700});await page.goto('/');
   const nav=page.getByRole('navigation',{name:'Main navigation'});await expect(nav.getByRole('link')).toHaveCount(4);
   await expect(nav.getByRole('button',{name:'Add transaction'})).toBeInViewport();
-  for(const label of ['Money','Accounts','Savings','Family']){
+  for(const label of ['Money','Accounts','Savings','Profile']){
     const link=nav.getByRole('link',{name:label,exact:true});await expect(link).toBeInViewport();
     const box=await link.boundingBox();expect(box!.width).toBeGreaterThanOrEqual(44);expect(box!.height).toBeGreaterThanOrEqual(44);
     await link.click();await expect(link).toHaveAttribute('aria-current','page');

@@ -23,7 +23,7 @@ test('mobile Money tabs retain filters and the dock adds from any screen',async(
   await expect(nav.getByRole('link')).toHaveCount(4);
   const add=nav.getByRole('button',{name:'Add transaction'});
   const box=await add.boundingBox();expect(box!.width).toBeGreaterThanOrEqual(44);expect(box!.height).toBeGreaterThanOrEqual(44);
-  for(const name of ['Accounts','Savings','Family']) {
+  for(const name of ['Accounts','Savings','Profile']) {
     await nav.getByRole('link',{name,exact:true}).click();await add.click();
     await expect(page.getByRole('dialog')).toHaveAccessibleName('Add transaction');
     await page.keyboard.press('Escape');await expect(add).toBeFocused();

@@ -1,20 +1,20 @@
 # Cashlendar verification
 
-## Money tabs and Excel update — 2026-10-06
+## Money tabs, Excel, Profile and Settings update — 2026-10-06
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| `pnpm test` | 15 passed | Existing finance/PWA checks plus actual 1,005-row export, filters, household isolation, original creator after another member edits, workbook round-trip, formula-looking notes and large IDR precision |
+| `pnpm test` | 17 passed | Existing finance/PWA checks plus actual 1,005-row export, filters, household isolation, original creator after another member edits, workbook round-trip, formula-looking notes and large IDR precision, profile-name validation and self-only profile updates retaining creator IDs |
 | `pnpm lint` | Passed | No lint errors |
 | `pnpm typecheck` | Passed | No TypeScript errors |
 | `pnpm exec node node_modules/next/dist/bin/next build --webpack` | Passed | Production pages and Node export route compiled and generated |
 | Authenticated/browser tests | Blocked | Local test transport cannot listen on 127.0.0.1:54329 (`EPERM`); escalation automatically rejected by session permissions. No current-update browser pass is claimed. |
 
-Added browser scenarios cover 320px Money tabs, month retention, selected calendar day, visible recorder, dock creation on Accounts/Savings/Family, keyboard tab switching, actual XLSX download beyond the first page, and unauthenticated export denial. Existing browser expectations now follow the four mobile links plus central +. They still need execution in an environment that permits local servers.
+Added browser scenarios cover 320px Money tabs, month retention, selected calendar day, visible recorder, dock creation on Accounts/Savings/Profile, keyboard tab switching, actual XLSX download beyond the first page, and unauthenticated export denial. Additional Profile scenarios cover name persistence, recorder display, Family/Settings access, disabled Soon controls, account switching with local logout scope and protected routes. Existing browser expectations now follow the four mobile links plus central + and logout in Profile. They still need execution in an environment that permits local servers.
 
-Read-only independent code review found no critical or important defects. Hosted migration 003 and deployment were not applied. The export queries through the authenticated user with row-level security, gathers both sheets in one SQL snapshot, and returns a private uncached response.
+Read-only independent code review found no critical or important financial/export defects. The Profile review identified that account switching inherited Supabase's global sign-out default; it now uses local scope to retain sessions on other devices. Hosted migration 003 and deployment were not applied. The export queries through the authenticated user with row-level security, gathers both sheets in one SQL snapshot, and returns a private uncached response.
 
-The ordinary `pnpm build` invocation encountered a TypeScript `--showConfig` capture error in this session's script runtime. Running the same Next build explicitly with Node completed successfully; no TypeScript checks were bypassed.
+The ordinary `pnpm build` invocation encountered a TypeScript `--showConfig` capture error in this session's script runtime. Running the same Next build explicitly with Node completed successfully; no TypeScript checks were bypassed. A parallel standalone typecheck initially raced build regeneration of `.next/types`; rerunning it after the build passed.
 
 ## Previous navigation/planning update
 

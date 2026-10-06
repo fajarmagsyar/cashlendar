@@ -5,6 +5,7 @@ import { PGlite } from '@electric-sql/pglite';
 
 // Test-only PostgREST transport; financial queries still execute the app's SQL and RLS.
 const db = new PGlite();
+let lastLogoutScope:string|null=null;
 const owner = '10000000-0000-4000-8000-000000000001';
 const member = '10000000-0000-4000-8000-000000000002';
 const secret = 'cashlendar-local-browser-test-secret';
@@ -40,8 +41,10 @@ createServer(async(req,res)=>{
   const url=new URL(req.url || '/','http://127.0.0.1:54329');
   const send=(status:number,value:unknown)=>{res.writeHead(status,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(value,(key,v)=>['date','target_date'].includes(key) && typeof v==='string' ? v.slice(0,10) : typeof v==='bigint' ? String(v) : v));};
   if(url.pathname==='/health'){send(200,{ready:true});return;}
+  if(url.pathname==='/test/last-logout'){send(200,{scope:lastLogoutScope});return;}
   if(url.pathname==='/test/reset' && req.method==='POST'){
-    await db.exec(`delete from planned_expenses;delete from transfers;delete from transactions where note not like 'Fixture expense %';delete from savings_goals where name<>'Emergency fund';delete from accounts where id not in ('${cash}','${savings}');delete from categories where name like 'Browser category%';`);
+    lastLogoutScope=null;
+    await db.exec(`update profiles set display_name='Test Owner' where id='${owner}';update profiles set display_name='Test Member' where id='${member}';delete from planned_expenses;delete from transfers;delete from transactions where note not like 'Fixture expense %';delete from savings_goals where name<>'Emergency fund';delete from accounts where id not in ('${cash}','${savings}');delete from categories where name like 'Browser category%';`);
     send(200,{reset:true});return;
   }
   if(url.pathname==='/test/session'){
@@ -52,7 +55,7 @@ createServer(async(req,res)=>{
   const user=identity(req.headers.authorization);
   if(!user){send(401,{message:'Not authenticated',code:'401'});return;}
   if(url.pathname==='/auth/v1/user'){send(200,user);return;}
-  if(url.pathname==='/auth/v1/logout'){send(200,{});return;}
+  if(url.pathname==='/auth/v1/logout'){lastLogoutScope=url.searchParams.get('scope') || 'global';send(200,{});return;}
   try {
     let body='';for await(const chunk of req) body+=chunk;
     const input=body ? JSON.parse(body) : {};

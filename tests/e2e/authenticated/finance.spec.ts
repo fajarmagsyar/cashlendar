@@ -33,7 +33,7 @@ test('three views show complete totals and support keyboard entry editing and de
   expect(errors).toEqual([]);
 });
 test('supporting screens render on phone and desktop, and dialogs restore keyboard focus',async({page})=>{
-  for(const route of ['/accounts','/savings','/family','/?month=2026-01','/charts?month=2026-01','/list?month=2026-01']){
+  for(const route of ['/accounts','/savings','/family','/profile','/settings','/?month=2026-01','/charts?month=2026-01','/list?month=2026-01']){
     await page.goto(route);
     for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);}
     await page.setViewportSize({width:test.info().project.name==='mobile' ? 390 : 1440,height:900});
@@ -60,6 +60,7 @@ test('switching Google accounts preserves the invitation destination',async({pag
 });
 test('sign-out and browser history do not expose the previous household',async({page})=>{
   await page.goto('/accounts');await expect(page.getByRole('heading',{name:'Accounts',exact:true})).toBeVisible();
+  await page.getByRole('link',{name:'Open profile',exact:true}).click();
   await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page).toHaveURL(/\/login/);
   await page.goBack();await expect(page).toHaveURL(/\/login/);
   await expect(page.getByRole('heading',{name:'Accounts',exact:true})).toHaveCount(0);

@@ -28,3 +28,8 @@ Checks for this update: 13 domain/database/worker tests and 24 authenticated bro
 Implemented shared Calendar/List/Charts tabs, mobile central dock creation, original recorder visibility, authenticated filtered XLSX export and migration 003. Added database/workbook unit coverage and browser scenarios; existing browser navigation expectations updated. Fifteen unit tests, lint and types passed; explicit-Node production build passed. Browser execution is blocked by local server socket permissions. Independent read-only review found no critical/important issues. Hosted migration and deployment remain manual.
 
 Ruling: continue authorized implementation directly under the developer autonomy instructions; no repeat design approval. Existing date-picker work preserved. No git/worktree operations because the repository metadata is read-only. Export covers the selected month and all current filters; plans use a separate sheet so recorded financial totals remain unchanged.
+
+
+## Profile / Settings — 2026-10-06
+
+Added Profile and Settings, replaced Family with Profile in navigation, moved signed-in logout into Profile, added self-only name editing and Google credential management/account switching, and linked Family from Profile. User confirmed Google-only login. Language and currency remain disabled Soon. Review caught global scope on account switching; corrected to local scope with a browser transport regression scenario. All 17 unit checks and the production build pass; current browser execution remains blocked. Profile uses existing policies and needs no additional migration.

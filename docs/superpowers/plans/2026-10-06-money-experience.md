@@ -51,10 +51,12 @@ Verification status: 15 unit tests, lint, types and explicit-Node production bui
 
 **Goal:** Profile becomes the account hub and the mobile dock destination formerly occupied by Family. Family and Settings remain reachable from Profile; logout moves from the header into Profile. Language and currency show current values and Soon without changing finance behavior.
 **Files:** new profile page, settings page, profile controls/actions/schema, profile query; navigation/header/icon/CSS and browser expectations.
-- [ ] Add profile schema and policy checks, browser scenarios for editing name, switching account and sign-out.
-- [ ] Implement self-only display-name updates and consistent header/recorder names.
-- [ ] Add Google credential-management and account-switch actions, pending optional clarification about email/password.
-- [ ] Show Family/Settings in Profile; mark English and IDR as Soon in Settings.
+- [x] Add profile schema and policy checks, browser scenarios for editing name, switching account and sign-out.
+- [x] Implement self-only display-name updates and consistent header/recorder names.
+- [x] Add Google credential-management and account-switch actions, pending optional clarification about email/password.
+- [x] Show Family/Settings in Profile; mark English and IDR as Soon in Settings.
 - [ ] Repeat relevant suite, types, lint and build; request a focused review.
 
 Ruling: retain Google-based authentication unless user asks for an additional provider. Credential management links to Google; changing Cashlendar display name changes the profile record, not the immutable recorder identity. Optional clarification requested while independent work continues.
+
+Profile delivery: Google-only choice confirmed. Independent review identified global switch-account logout; changed to local. Seventeen unit checks pass. Browser validation remains blocked; profile/settings production build succeeds.

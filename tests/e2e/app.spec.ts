@@ -16,7 +16,7 @@ test('unconfigured app presents honest setup and contains the layout', async ({p
   expect(errors).toEqual([]);
 });
 test('protected routes do not reveal household data without configuration',async({page})=>{
-  for(const route of ['/accounts','/savings','/charts','/list','/family','/onboarding']){
+  for(const route of ['/accounts','/savings','/charts','/list','/family','/profile','/settings','/onboarding']){
     await page.goto(route);await expect(page).toHaveURL(/\/login/);
   }
 });
