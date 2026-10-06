@@ -1,34 +1,60 @@
 'use client';
 import { useState } from 'react';
 import { Dialog } from '@/components/dialog';
-import { ActionForm, Field } from '@/components/action-form';
+import { ActionForm,Field } from '@/components/action-form';
+import { AmountInput } from '@/components/amount-input';
+import { DatePicker } from '@/components/date-picker';
 import { Icon } from '@/components/icon';
-import { saveEntry, deleteEntry } from './actions';
+import { saveEntry,deleteEntry,savePlannedExpense } from './actions';
 import { todayJakarta } from '@/lib/finance/dates';
-import type { Account, Category, Entry } from '@/lib/finance/types';
-export function EntryButton({ accounts,categories,date,entry,defaultKind='expense',defaultAccount='',destination='',label }: {
-  accounts:Account[]; categories:Category[]; date?:string; entry?:Entry; defaultKind?:string; defaultAccount?:string; destination?:string; label?:string;
-}) {
-  const [open,setOpen] = useState(false);
-  return <><button type="button" className={entry ? 'text-button' : 'button primary'} onClick={()=>setOpen(true)} disabled={!entry && accounts.every(a=>a.archived_at)}>{!entry && <Icon name="plus" size={18}/>} {label || (entry ? 'Edit' : 'Add transaction')}</button>{open && <EntryDialog accounts={accounts} categories={categories} date={date} entry={entry} defaultKind={defaultKind} defaultAccount={defaultAccount} destination={destination} onClose={()=>setOpen(false)}/>}</>;
+import { formatRupiah } from '@/lib/finance/money';
+import type { Account,Category,Entry,PlannedExpense } from '@/lib/finance/types';
+
+type EntryProps={accounts:Account[];categories:Category[];date?:string;entry?:Entry;plan?:PlannedExpense;defaultKind?:string;defaultAccount?:string;destination?:string;label?:string;className?:string;iconOnly?:boolean};
+export function EntryButton(props:EntryProps) {
+  const [open,setOpen]=useState(false);
+  const editing=props.entry || props.plan;
+  return <><button type="button" aria-label={props.iconOnly ? 'Add transaction' : undefined} className={props.className || (editing ? 'text-button' : 'button primary')} onClick={()=>setOpen(true)} disabled={!editing && props.accounts.every(a=>a.archived_at)}>
+    {!editing && <Icon name="plus" size={18}/>} {!props.iconOnly && (props.label || (editing ? 'Edit' : 'Add transaction'))}
+  </button>{open && <EntryDialog {...props} onClose={()=>setOpen(false)}/>}</>;
 }
-function EntryDialog({ accounts,categories,date,entry,defaultKind,defaultAccount,destination,onClose }: {
-  accounts:Account[]; categories:Category[]; date?:string; entry?:Entry; defaultKind:string; defaultAccount:string; destination:string; onClose:()=>void;
-}) {
-  const [kind,setKind] = useState(entry?.kind || defaultKind);
-  const active = accounts.filter(a=>!a.archived_at);
-  const allowedCategories = categories.filter(c=>!c.archived_at && c.kind===kind);
-  return <Dialog title={entry ? 'Edit entry' : 'A new entry'} onClose={onClose}><ActionForm action={saveEntry} onSuccess={onClose} submit={entry ? 'Save changes' : 'Save entry'}>
-    <input type="hidden" name="id" value={entry?.id || ''}/>
-    <Field label="Entry type"><select name="kind" value={kind} onChange={e=>setKind(e.target.value)}>{(!entry || entry.kind!=='transfer') && <><option value="expense">Expense</option><option value="income">Income</option></>}{(!entry || entry.kind==='transfer') && <option value="transfer">Transfer</option>}</select></Field>
-    <div className="form-grid"><Field label="Amount (IDR)" hint="Whole rupiah, no decimals or separators."><input name="amount" type="text" inputMode="numeric" pattern="[0-9]+" defaultValue={entry?.amount} required placeholder="0"/></Field><Field label="Date"><input name="date" type="date" min="1900-01-01" max={todayJakarta()} defaultValue={entry?.date || (date && date<=todayJakarta() ? date : todayJakarta())} required/></Field></div>
-    <Field label={kind==='transfer' ? 'From account' : 'Account'}><select name="account_id" defaultValue={entry?.account_id || defaultAccount} required><option value="">Choose an account</option>{active.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></Field>
-    {kind==='transfer' ? <Field label="To account"><select name="destination_account_id" defaultValue={entry?.destination_account_id || destination} required><option value="">Choose a different account</option>{active.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></Field> : <Field label="Category"><select key={kind} name="category_id" defaultValue={entry?.kind===kind ? entry.category_id || '' : ''} required><option value="">Choose a category</option>{allowedCategories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>}
-    <Field label="Note (optional)"><textarea name="note" defaultValue={entry?.note} maxLength={500} rows={3} placeholder="What was it for?"/></Field>
-    {kind==='transfer' && <p className="muted">Transfers move money between accounts. They don’t count as income or expenses.</p>}
+
+function EntryDialog({accounts,categories,date,entry,plan,defaultKind='expense',defaultAccount='',destination='',onClose}:EntryProps & {onClose:()=>void}) {
+  const today=todayJakarta();
+  const [kind,setKind]=useState(entry?.kind || defaultKind);
+  const [planned,setPlanned]=useState(Boolean(plan || (!entry && kind==='expense' && date && date>today)));
+  const [entryDate,setEntryDate]=useState(plan?.date || entry?.date || (date && (planned || date<=today) ? date : today));
+  const active=accounts.filter(a=>!a.archived_at);
+  const record=plan || entry;
+  const [accountId,setAccountId]=useState(record?.account_id || defaultAccount || (active.length===1 ? active[0].id : ''));
+  const allowedCategories=categories.filter(c=>!c.archived_at && c.kind===kind);
+  const account=accounts.find(a=>a.id===accountId);
+  const title=record ? (plan ? 'Edit planned expense' : 'Edit transaction') : planned ? 'Plan an expense' : 'Add transaction';
+  const types=plan ? ['expense'] : entry?.kind==='transfer' ? ['transfer'] : entry ? ['expense','income'] : ['expense','income','transfer'];
+  function chooseKind(next:string) {
+    if(next===kind) return;
+    setKind(next);setPlanned(false);
+    if(entryDate>today) setEntryDate(today);
+  }
+  function choosePlanned(next:boolean) {
+    setPlanned(next);
+    if(!next && entryDate>today) setEntryDate(today);
+  }
+  return <Dialog title={title} onClose={onClose} className="entry-dialog"><ActionForm className="entry-form" action={planned ? savePlannedExpense : saveEntry} onSuccess={onClose} submit={record ? 'Save changes' : planned ? 'Save plan' : kind==='transfer' ? 'Save transfer' : 'Save transaction'}>
+    <input type="hidden" name="id" value={record?.id || ''}/><input type="hidden" name="kind" value={kind}/>
+    {types.length>1 && <div className="entry-type-switch" role="group" aria-label="Entry type">{types.map(type=><button type="button" key={type} aria-pressed={kind===type} onClick={()=>chooseKind(type)}>{type==='expense' ? 'Expense' : type==='income' ? 'Income' : 'Transfer'}</button>)}</div>}
+    <div className="entry-amount-field"><Field label="Amount (IDR)"><AmountInput name="amount" required defaultValue={record?.amount} data-autofocus/></Field></div>
+    {kind==='expense' && !record && <div className="expense-timing" role="group" aria-label="Expense timing"><button type="button" aria-pressed={!planned} onClick={()=>choosePlanned(false)}>Spent</button><button type="button" aria-pressed={planned} onClick={()=>choosePlanned(true)}><Icon name="calendar" size={16}/>Planned</button></div>}
+    {planned && <p className="planning-caption">Your balance changes when you mark it paid.</p>}
+    <div className="form-grid">
+      <Field label="Date"><DatePicker name="date" min="1900-01-01" max={planned ? '9999-12-31' : today} value={entryDate} onChange={setEntryDate} required/></Field>
+      <Field label={kind==='transfer' ? 'From account' : 'Account'} hint={account ? `Balance ${formatRupiah(account.balance ?? account.opening_balance)}` : undefined}><select name="account_id" value={accountId} onChange={e=>setAccountId(e.target.value)} required><option value="">Choose account</option>{active.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></Field>
+    </div>
+    {kind==='transfer' ? <Field label="To account"><select name="destination_account_id" defaultValue={entry?.destination_account_id || destination} required><option value="">Choose account</option>{active.filter(a=>a.id!==accountId).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></Field> : <Field label="Category"><select key={kind} name="category_id" defaultValue={record && (plan || entry?.kind===kind) ? record.category_id || '' : ''} required><option value="">Choose category</option>{allowedCategories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field>}
+    <Field label="Note (optional)"><input name="note" defaultValue={record?.note} maxLength={500} placeholder="What’s it for?"/></Field>
   </ActionForm></Dialog>;
 }
-export function DeleteEntryButton({ entry }: { entry:Entry }) {
-  const [open,setOpen] = useState(false);
-  return <><button className="text-button danger" onClick={()=>setOpen(true)}>Delete</button>{open && <Dialog title="Delete this entry?" onClose={()=>setOpen(false)}><p>This removes the entry and recalculates your balances. This cannot be undone.</p><ActionForm action={()=>deleteEntry({ id:entry.id,kind:entry.kind })} submit="Delete entry" onSuccess={()=>setOpen(false)}><p className="muted">{entry.note || entry.category_name || 'Account transfer'} · {entry.date}</p></ActionForm></Dialog>}</>;
+export function DeleteEntryButton({entry}:{entry:Entry}) {
+  const [open,setOpen]=useState(false);
+  return <><button className="text-button danger" onClick={()=>setOpen(true)}>Delete</button>{open && <Dialog title="Delete transaction?" onClose={()=>setOpen(false)}><p>{entry.note || entry.category_name || 'Transfer'} · {formatRupiah(entry.amount)}</p><ActionForm action={()=>deleteEntry({id:entry.id,kind:entry.kind})} submit="Delete entry" onSuccess={()=>setOpen(false)}/></Dialog>}</>;
 }

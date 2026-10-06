@@ -5,10 +5,12 @@ export type Category = { id: string; name: string; kind: EntryKind; archived_at:
 export type Transaction = { id: string; kind: EntryKind; account_id: string; category_id: string; amount: number; date: string; note: string; created_by: string; updated_by: string };
 export type Transfer = { id: string; source_account_id: string; destination_account_id: string; amount: number; date: string; note: string; created_by: string; updated_by: string };
 export type SavingsGoal = { id: string; account_id: string; name: string; target_amount: number; target_date: string | null; archived_at: string | null };
-export type EntryFilters = { month: string; account: string; category: string; kind: string; search: string; page: number };
+export type FinanceView = 'calendar' | 'list' | 'charts';
+export type EntryFilters = { view?: FinanceView; month: string; account: string; category: string; kind: string; search: string; page: number };
 export type Entry = { id: string; kind: EntryKind | 'transfer'; date: string; amount: number; note: string; account_id: string; category_id: string | null; account_name: string; destination_account_id: string | null; destination_name: string | null; category_name: string | null; author: string };
 export type FinanceSummary = { income: number; expenses: number; net: number; count: number; days: { date: string; income: number; expenses: number }[]; categories: { name: string; amount: number }[] };
 export type FinanceData = { accounts: Account[]; categories: Category[]; entries: Entry[]; summary: FinanceSummary };
+export type PlannedExpense = { id:string; date:string; amount:number; note:string; account_id:string; category_id:string; account_name:string; category_name:string };
 export type Household = { id: string; name: string; owner_id: string };
 export type Membership = { household_id: string; user_id: string; role: 'owner' | 'member' };
 export type ActionResult<T = undefined> = { ok: true; data?: T } | { ok: false; error: string; fieldErrors?: Record<string, string> };

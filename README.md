@@ -1,6 +1,14 @@
 # Cashlendar
 
-A shared-household money manager with Calendar, Charts, and List views, Google login, IDR accounts, transfers, savings goals, and home-screen installation.
+A shared-household money manager with Calendar, List, and Charts tabs, Google login, IDR accounts, transfers, savings goals, Excel export, and home-screen installation.
+
+## Update an existing installation
+
+Apply `supabase/migrations/202610060003_finance_export.sql` in your Supabase SQL Editor, then deploy the updated app to Vercel. If the planned-expense migration `202610060002_planned_expenses.sql` has not been applied yet, apply it first. Run each migration once, in filename order. Both preserve existing accounts and transactions. If you manage migration history through the Supabase CLI, use `supabase db push` instead.
+
+On mobile, Money contains Calendar, List, and Charts tabs with a shared month and filters. The central + in the dock opens Add transaction from any signed-in screen. Transactions show the original signed-in recorder; editing an entry preserves that attribution. Export Excel downloads all entries matching the current month and filters, including pages beyond the visible list. Planned expenses appear on a separate sheet. Amounts remain numeric for calculations; amounts requiring more than Excel's 15 significant digits are exported as exact text.
+
+In Add transaction, choose Expense → Planned and set the spending date. Selecting a future day in the calendar starts a planned expense automatically. Plans appear on the calendar but do not affect balances or charts. Mark paid records an expense on the payment date and removes the plan atomically. Plans can also be edited or deleted. Amount fields add IDR thousand separators as you type, such as `1.250.000`.
 
 ## Run locally
 
@@ -17,7 +25,7 @@ Open http://localhost:3000. Without Supabase configuration, Cashlendar shows set
 ## Supabase setup
 
 1. Create a dedicated Supabase project for Cashlendar.
-2. Open the SQL Editor and run `supabase/migrations/202610060001_cashlendar.sql` once, or apply the migration through the Supabase CLI below. This creates tables, policies, database functions, signup profile handling, indexes, and transaction validation.
+2. Open the SQL Editor and run the files under `supabase/migrations/` in filename order, once each, or apply them through the Supabase CLI below. This creates tables, policies, database functions, signup profile handling, indexes, and transaction validation.
 3. Copy your project URL and publishable key from the project's Connect dialog into `.env.local`:
 
 ```dotenv
@@ -93,9 +101,9 @@ pnpm test:e2e:auth
 
 The test suite executes financial validation and the actual SQL migration in an embedded PostgreSQL instance using PGlite. Its auth schema simulates user identities, including verified email and roles. It verifies database permissions and integrity rather than mocking finance query results. It does not prove hosted Supabase configuration, Google OAuth, or multi-connection concurrency.
 
-The baseline browser tests run against an app without Supabase configuration, checking route protection, configuration states, responsive containment, install assets, and offline navigation. Chromium is used from `/usr/bin/chromium` if available; otherwise install Playwright's browser with `pnpm exec playwright install chromium`. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to choose an installed browser.
+The baseline browser tests build an isolated production app in `.next-baseline` and start it on port 3002 with blank Supabase configuration. They check route protection, configuration states, responsive containment, install assets, and offline navigation without changing `.env.local` or using your hosted project. Chromium is used from `/usr/bin/chromium` if available; otherwise install Playwright's browser with `pnpm exec playwright install chromium`. Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to choose an installed browser.
 
-The authenticated browser suite starts its own app on port 3001 and a local test-only Supabase transport on port 54329. The transport executes the real migration and RLS in PGlite; it supplies signed test sessions instead of contacting Google. It checks entry creation, editing and deletion, complete reports beyond one page, accounts, savings transfers, family permissions, invitation account switching, sign-out, keyboard dialogs, field errors, and narrow layouts. Production source does not use this transport. Both ports must be free before running the suite.
+The authenticated browser suite starts its own app on port 3001 and a local test-only Supabase transport on port 54329. The transport executes the real migrations and RLS in PGlite; it supplies signed test sessions instead of contacting Google. It checks entry creation, editing and deletion, planning and payment, formatted amount editing, complete reports beyond one page, accounts, savings transfers, family permissions, invitation account switching, sign-out, keyboard dialogs, field errors, and narrow layouts. Production source does not use this transport. Both ports must be free before running the suite.
 
 See `docs/verification.md` for the actual checks run and remaining integration requirements.
 

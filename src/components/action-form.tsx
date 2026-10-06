@@ -3,8 +3,8 @@ import { useState, useId, cloneElement, isValidElement, createContext, useContex
 import { useRouter } from 'next/navigation';
 import type { ActionResult } from '@/lib/finance/types';
 const FormErrors = createContext<Record<string,string>>({});
-export function ActionForm({ children, action, submit='Save', onSuccess }: {
-  children:ReactNode; action:(input:Record<string,string>)=>Promise<ActionResult<unknown>>; submit?:string; onSuccess?:()=>void;
+export function ActionForm({ children, action, submit='Save', onSuccess,className='' }: {
+  children?:ReactNode; action:(input:Record<string,string>)=>Promise<ActionResult<unknown>>; submit?:string; onSuccess?:()=>void;className?:string;
 }) {
   const [pending,setPending] = useState(false);
   const [result,setResult] = useState<ActionResult<unknown> | null>(null);
@@ -22,9 +22,9 @@ export function ActionForm({ children, action, submit='Save', onSuccess }: {
     } catch { setResult({ ok:false,error:'Could not connect. Your input is still here; please try again.' }); }
     finally { setPending(false); }
   }
-  return <form onSubmit={send} className="form" aria-busy={pending}>
-    <FormErrors.Provider value={result && !result.ok ? result.fieldErrors || {} : {}}><fieldset disabled={pending}>{children}</fieldset></FormErrors.Provider>
-    {result && !result.ok && <div className="notice error-notice" role="alert"><p>{result.error}</p>{result.fieldErrors && <ul>{Object.entries(result.fieldErrors).map(([field,message])=><li key={field}><strong>{field.replaceAll('_',' ')}:</strong> {message}</li>)}</ul>}</div>}
+  return <form onSubmit={send} className={`form ${className}`} aria-busy={pending}>
+    <FormErrors.Provider value={result && !result.ok ? result.fieldErrors || {} : {}}><div className="form-fields"><fieldset disabled={pending}>{children}</fieldset></div></FormErrors.Provider>
+    {result && !result.ok && <div className="notice error-notice" role="alert"><p>{result.error}</p></div>}
     {result?.ok && !onSuccess && <p className="success-text" role="status">Saved.</p>}
     <button className="button primary" disabled={pending}>{pending ? 'Saving…' : submit}</button>
   </form>;

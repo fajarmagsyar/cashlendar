@@ -1,6 +1,7 @@
 'use client';
 import { useEffect,useState,useSyncExternalStore } from 'react';
 import { Icon } from './icon';
+import { Dialog } from './dialog';
 type InstallEvent = Event & { prompt:()=>Promise<void>; userChoice:Promise<{outcome:string}> };
 const subscribe = () => () => {};
 function isIos() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches; }
@@ -20,5 +21,8 @@ export function InstallGuidance() {
     return ()=>{window.removeEventListener('beforeinstallprompt',handle);window.removeEventListener('appinstalled',installed);};
   },[]);
   if (dismissed || (!ios && !prompt)) return null;
-  return <aside className="install-tip" aria-label="Install Cashlendar"><button className="text-button" onClick={async()=>{if(prompt){await prompt.prompt();await prompt.userChoice;setPrompt(null);}else setInstructions(true);}}><Icon name="download" size={18}/>Install Cashlendar</button>{instructions && <p>In Safari, tap Share, then “Add to Home Screen”.</p>}<button className="icon-button" aria-label="Dismiss installation tip" onClick={()=>setDismissed(true)}><Icon name="close" size={16}/></button></aside>;
+  return <><button type="button" className="icon-button install-button" aria-label="Install Cashlendar" title="Install Cashlendar" onClick={async()=>{
+    if(prompt){try{await prompt.prompt();const choice=await prompt.userChoice;if(choice.outcome==='accepted') setDismissed(true);setPrompt(null);}catch{setInstructions(true);}}
+    else setInstructions(true);
+  }}><Icon name="download" size={20}/></button>{instructions && <Dialog title="Install Cashlendar" onClose={()=>setInstructions(false)}><p>In Safari, tap Share, then Add to Home Screen.</p></Dialog>}</>;
 }

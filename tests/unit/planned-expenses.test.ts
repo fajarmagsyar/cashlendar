@@ -1,0 +1,57 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile,readdir } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+
+test('plans stay out of balances and turn into one expense atomically with household isolation',async()=>{
+  const db=new PGlite();
+  try{
+    await db.exec(`create role authenticated;create role anon;create schema auth;
+      create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,raw_user_meta_data jsonb default '{}');
+      create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+      grant usage on schema auth,public to authenticated;grant execute on function auth.uid() to authenticated;`);
+    for(const file of (await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')).sort()) await db.exec(await readFile(`supabase/migrations/${file}`,'utf8'));
+    const owner='10000000-0000-4000-8000-000000000001',outsider='10000000-0000-4000-8000-000000000002';
+    await db.query(`insert into auth.users(id,email,email_confirmed_at) values($1,'owner@example.com',now()),($2,'other@example.com',now())`,[owner,outsider]);
+    const asUser=async(id:string)=>db.exec(`reset role;set request.jwt.claim.sub='${id}';set role authenticated;`);
+    await asUser(owner);
+    const hid=(await db.query<{id:string}>(`select create_household('Plans') as id`)).rows[0].id;
+    const aid=(await db.query<{id:string}>(`insert into accounts(household_id,name,type,opening_balance) values($1,'Cash','cash',1000000) returning id`,[hid])).rows[0].id;
+    const cid=(await db.query<{id:string}>(`select id from categories where kind='expense' limit 1`)).rows[0].id;
+    const income=(await db.query<{id:string}>(`select id from categories where kind='income' limit 1`)).rows[0].id;
+    const pid=(await db.query<{id:string}>(`insert into planned_expenses(household_id,account_id,category_id,amount,date,note) values($1,$2,$3,150000,'2999-01-01','Next bill') returning id`,[hid,aid,cid])).rows[0].id;
+    const planned=(await db.query<{plans:{id:string;amount:string}[]}>(`select list_planned_expenses('2999-01-01','2999-02-01',$1,$2) as plans`,[aid,cid])).rows[0].plans;
+    assert.equal(planned.length,1);assert.equal(planned[0].id,pid);assert.equal(planned[0].amount,'150000');
+    assert.equal((await db.query<{plans:unknown[]}>(`select list_planned_expenses('2999-01-01','2999-02-01',null,$1) as plans`,[income])).rows[0].plans.length,0);
+    assert.equal((await db.query<{balance:string}>(`select * from account_balances()`)).rows[0].balance,'1000000');
+    assert.equal((await db.query<{s:{expenses:string}}>(`select finance_summary('2999-01-01','2999-02-01') as s`)).rows[0].s.expenses,'0');
+    await assert.rejects(db.query(`insert into planned_expenses(household_id,account_id,category_id,amount,date) values($1,$2,$3,1,'2999-01-01')`,[hid,aid,income]),/category/i);
+    await asUser(outsider);await db.query(`select create_household('Other')`);
+    assert.equal((await db.query(`select * from planned_expenses`)).rows.length,0);
+    assert.equal((await db.query<{plans:unknown[]}>(`select list_planned_expenses('2999-01-01','2999-02-01') as plans`)).rows[0].plans.length,0);
+    await assert.rejects(db.query(`select pay_planned_expense($1,'2026-01-01')`,[pid]),/available|access/i);
+    await assert.rejects(db.query(`insert into planned_expenses(household_id,account_id,category_id,amount,date) values($1,$2,$3,1,'2999-01-01')`,[hid,aid,cid]),/access|policy|row.level/i);
+    await asUser(owner);
+    await assert.rejects(db.query(`select pay_planned_expense($1,'2999-01-01')`,[pid]),/date/i);
+    assert.equal((await db.query(`select * from planned_expenses`)).rows.length,1);
+    await db.query(`update accounts set archived_at=now() where id=$1`,[aid]);
+    await assert.rejects(db.query(`select pay_planned_expense($1,'2026-01-01')`,[pid]),/archived/i);
+    assert.equal((await db.query(`select * from transactions`)).rows.length,0);
+    await db.query(`update accounts set archived_at=null where id=$1`,[aid]);
+    await db.query(`select pay_planned_expense($1,'2026-01-01')`,[pid]);
+    assert.equal((await db.query(`select * from planned_expenses`)).rows.length,0);
+    assert.equal((await db.query<{balance:string}>(`select * from account_balances()`)).rows[0].balance,'850000');
+    await db.query(`insert into planned_expenses(household_id,account_id,category_id,amount,date) select $1,$2,$3,1,'2999-01-01' from generate_series(1,1005)`,[hid,aid,cid]);
+    assert.equal((await db.query<{plans:unknown[]}>(`select list_planned_expenses('2999-01-01','2999-02-01') as plans`)).rows[0].plans.length,1005);
+    const tx=(await db.query<{kind:string;note:string;amount:number}>(`select kind,note,amount from transactions`)).rows;
+    assert.equal(tx.length,1);assert.equal(tx[0].kind,'expense');assert.equal(tx[0].note,'Next bill');
+    await assert.rejects(db.query(`select pay_planned_expense($1,'2026-01-01')`,[pid]),/available/i);
+    assert.equal((await db.query(`select * from transactions`)).rows.length,1);
+    const large=(await db.query<{id:string}>(`insert into planned_expenses(household_id,account_id,category_id,amount,date) values($1,$2,$3,9007199254740991,'2999-01-01') returning id`,[hid,aid,cid])).rows[0].id;
+    await assert.rejects(db.query(`select pay_planned_expense($1,'2026-01-01')`,[large]),/supported.*range/i);
+    assert.equal((await db.query(`select * from planned_expenses where id=$1`,[large])).rows.length,1);
+    assert.equal((await db.query(`select * from transactions`)).rows.length,1);
+    assert.equal((await db.query<{balance:string}>(`select * from account_balances()`)).rows[0].balance,'850000');
+    await db.exec('reset role;set role anon');await assert.rejects(db.query('select * from planned_expenses'),/permission/i);
+  }finally{await db.close();}
+});

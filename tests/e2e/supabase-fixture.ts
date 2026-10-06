@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { createHmac,timingSafeEqual } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readFile,readdir } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 
 // Test-only PostgREST transport; financial queries still execute the app's SQL and RLS.
@@ -16,7 +16,7 @@ await db.exec(`create role authenticated;create role anon;create schema auth;
 create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,raw_user_meta_data jsonb default '{}');
 create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
 grant usage on schema auth,public to authenticated;grant execute on function auth.uid() to authenticated;`);
-await db.exec(await readFile('supabase/migrations/202610060001_cashlendar.sql','utf8'));
+for(const file of (await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')).sort()) await db.exec(await readFile(`supabase/migrations/${file}`,'utf8'));
 for(const user of Object.values(users)) await db.query(`insert into auth.users(id,email,email_confirmed_at,raw_user_meta_data) values($1,$2,now(),$3)`,[user.id,user.email,JSON.stringify(user.user_metadata)]);
 await db.exec(`set request.jwt.claim.sub='${owner}';`);
 const household = (await db.query<{id:string}>(`select create_household('Browser Test Family') as id`)).rows[0].id;
@@ -33,15 +33,15 @@ function token(id:string){ const unsigned=`${encode({alg:'HS256',typ:'JWT'})}.${
 function identity(value:string|undefined){
   try {const t=value?.replace(/^Bearer /,'') || '';const [h,p,s]=t.split('.');const signature=createHmac('sha256',secret).update(`${h}.${p}`).digest();const actual=Buffer.from(s,'base64url');if(actual.length!==signature.length || !timingSafeEqual(actual,signature)) return null;const payload=JSON.parse(Buffer.from(p,'base64url').toString());return users[payload.sub] || null; } catch {return null;}
 }
-const tables=new Set(['profiles','households','household_members','invitations','accounts','categories','transactions','transfers','savings_goals']);
-const rpcs=new Set(['create_household','create_invitation','accept_invitation','remove_member','revoke_invitation','account_balances','list_entries','finance_summary']);
+const tables=new Set(['profiles','households','household_members','invitations','accounts','categories','transactions','transfers','savings_goals','planned_expenses']);
+const rpcs=new Set(['create_household','create_invitation','accept_invitation','remove_member','revoke_invitation','account_balances','list_entries','finance_summary','list_planned_expenses','pay_planned_expense','export_finances']);
 const identifier=(value:string)=>{if(!/^[a-z_]+$/.test(value)) throw new Error('Invalid fixture identifier');return `"${value}"`;};
 createServer(async(req,res)=>{
   const url=new URL(req.url || '/','http://127.0.0.1:54329');
   const send=(status:number,value:unknown)=>{res.writeHead(status,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(value,(key,v)=>['date','target_date'].includes(key) && typeof v==='string' ? v.slice(0,10) : typeof v==='bigint' ? String(v) : v));};
   if(url.pathname==='/health'){send(200,{ready:true});return;}
   if(url.pathname==='/test/reset' && req.method==='POST'){
-    await db.exec(`delete from transfers;delete from transactions where note not like 'Fixture expense %';delete from savings_goals where name<>'Emergency fund';delete from accounts where id not in ('${cash}','${savings}');delete from categories where name like 'Browser category%';`);
+    await db.exec(`delete from planned_expenses;delete from transfers;delete from transactions where note not like 'Fixture expense %';delete from savings_goals where name<>'Emergency fund';delete from accounts where id not in ('${cash}','${savings}');delete from categories where name like 'Browser category%';`);
     send(200,{reset:true});return;
   }
   if(url.pathname==='/test/session'){

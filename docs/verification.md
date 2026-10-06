@@ -1,22 +1,48 @@
 # Cashlendar verification
 
+## Money tabs and Excel update — 2026-10-06
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `pnpm test` | 15 passed | Existing finance/PWA checks plus actual 1,005-row export, filters, household isolation, original creator after another member edits, workbook round-trip, formula-looking notes and large IDR precision |
+| `pnpm lint` | Passed | No lint errors |
+| `pnpm typecheck` | Passed | No TypeScript errors |
+| `pnpm exec node node_modules/next/dist/bin/next build --webpack` | Passed | Production pages and Node export route compiled and generated |
+| Authenticated/browser tests | Blocked | Local test transport cannot listen on 127.0.0.1:54329 (`EPERM`); escalation automatically rejected by session permissions. No current-update browser pass is claimed. |
+
+Added browser scenarios cover 320px Money tabs, month retention, selected calendar day, visible recorder, dock creation on Accounts/Savings/Family, keyboard tab switching, actual XLSX download beyond the first page, and unauthenticated export denial. Existing browser expectations now follow the four mobile links plus central +. They still need execution in an environment that permits local servers.
+
+Read-only independent code review found no critical or important defects. Hosted migration 003 and deployment were not applied. The export queries through the authenticated user with row-level security, gathers both sheets in one SQL snapshot, and returns a private uncached response.
+
+The ordinary `pnpm build` invocation encountered a TypeScript `--showConfig` capture error in this session's script runtime. Running the same Next build explicitly with Node completed successfully; no TypeScript checks were bypassed.
+
+## Previous navigation/planning update
+
 Checked locally on 2026-10-06 with Node 26.8.1, pnpm 11.3.0, and system Chromium.
 
 | Check | Result | Evidence covered |
 | --- | --- | --- |
-| `pnpm test` | 10 passed | IDR precision, Jakarta dates, transfer accounting, savings progress, redirect safety, validation, actual SQL/RLS, invitations, rollback on aggregate overflow, worker cache allowlist |
-| `pnpm test:e2e:auth` | 14 passed | Desktop and mobile transaction CRUD, full reports across pagination, supporting views, keyboard dialogs, field validation, savings transfers, account/goal persistence, owner/member controls, invitation account switching, sign-out and browser history |
+| `pnpm test` | 13 passed | IDR precision and grouped amounts, Jakarta dates, transfers, savings, redirects, actual SQL/RLS, invitations, aggregate rollback, planned-expense isolation and atomic payment, 1005-plan reporting, worker cache allowlist |
+| `pnpm test:e2e:auth` | 24 passed | Desktop/mobile transaction CRUD and full reports, accounts/goals, family permissions, invitation account switching, sign-out, planning and rescheduling, cancellation and payment, cursor editing, six dock destinations, 320 × 600 sheet layout |
 | `pnpm test:e2e` | 6 passed | Production configuration state, protected routes, responsive containment, manifest and icons, actual worker offline navigation |
 | `pnpm lint` | Passed | No lint errors |
 | `pnpm typecheck` | Passed | No TypeScript errors |
 | `pnpm build` | Passed | Production routes compiled and generated |
 
-The authenticated suite uses the production application's pages and server actions with a local test-only Supabase HTTP transport. Its database executes the real migration and row-level security; its sessions simulate Google-authenticated users. It runs its own isolated development build in `.next-auth`. The baseline suite runs the production build without configured Supabase credentials. Initial baseline test discovery included authenticated tests without their required server; restricting its matcher to `app.spec.ts` corrected that harness error.
+The authenticated suite uses the production application's pages and server actions with a local test-only Supabase HTTP transport. Its database executes the real migrations and row-level security; its sessions simulate Google-authenticated users. It runs its own isolated development build in `.next-auth`. The baseline suite builds and runs `.next-baseline` on port 3002 with empty Supabase environment variables, so it never changes `.env.local` or contacts the user's configured project. Initial baseline test discovery included authenticated tests without their required server; restricting its matcher to `app.spec.ts` corrected that harness error.
 
 Database checks include anonymous denial, cross-household read/write denial, owner-only membership changes, removal invalidating access, verified-email invitation matching, expiry/revocation/reuse, archived references, category/type matching, creator immutability, complete summaries beyond a page, transfer atomicity, and saving-account linkage. Overflow cases exercise real rejected writes and verify rollback. These embedded database checks do not simulate separate concurrent PostgreSQL connections.
 
-Browser layout checks cover 320, 390, 768, and 1440 px widths. Screenshots were inspected for desktop calendar and savings views. Chromium mobile emulation verifies layout and interactions; physical iOS/Android installation and Safari behavior remain unverified. The worker caches only public icons and a reconnect document. Financial data needs a network connection.
+Browser layout checks cover 320, 390, 768, and 1440 px widths. Screenshots were inspected for desktop and phone calendar, planning, and entry sheets. A short-screen test verifies that the focused note stays above Save at 320 × 600. Chromium mobile emulation verifies layout and interactions; physical iOS/Android installation and Safari behavior remain unverified. The worker caches only public icons and a reconnect document. Financial data needs a network connection.
 
 Review found two important issues: aggregate overflow could prevent balance rendering, and switching Google accounts discarded the invitation token. Both were fixed and regression-tested. Input error association and adjacent-month calendar announcements were also corrected.
 
-Hosted Supabase migration, real Google OAuth, second-person invitation acceptance through Google, Vercel deployment, and HTTPS device installation still require external configuration and verification. No credentials, hosted resources, or live deployment were supplied. Follow README.md before using real household finances.
+The user reports that their original hosted setup works. This update was checked locally without changing hosted finances. The new planned-expense migration and deployment still need to be applied to that installation; migration execution access and a deployment connector are not available here. Hosted concurrency and physical-device installation were not verified in this update.
+
+## UI delivery checks
+
+- Hard rules PASS: browser containment at 320–1440 px, no fabricated balances or people in product source, existing routes retained, keyboard dialogs and real finance actions exercised by 24 authenticated checks.
+- Contrast PASS: body 13.60:1, muted text 5.55:1, placeholder/outside-month dates 4.70:1, dock text over the darkest possible backdrop 4.68:1, active dock 7.64:1, planned labels 5.84:1. Ratios computed from the final CSS colors using relative luminance.
+- Purpose PASS: navigation alone uses glass and elevation. The dock's six icons represent real destinations; a hollow calendar marker denotes planned spending. Cards and money fields stay opaque. Reasons are recorded in ui-refresh.md.
+- Direction PASS: ENERGY 1 / RHYTHM 2 / MOTION 1. Existing light green identity, system typography, amounts as the entry-form focal point, restrained hover/press feedback, and reduced-motion support.
+- Quality PASS: concise page names and action labels replace marketing filler; no new theme toggle or invented data. Input validation, pending/error states, focus restoration, offline handling, and actual SQL policies remain covered. Production compilation, lint, and TypeScript checks are recorded above.

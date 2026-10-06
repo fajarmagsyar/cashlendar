@@ -4,6 +4,14 @@ export function parseRupiah(input: string, allowZero = false): number {
   if (!Number.isSafeInteger(amount) || amount < (allowZero ? 0 : 1)) throw new Error(allowZero ? 'Enter a valid nonnegative rupiah amount.' : 'Enter a positive whole rupiah amount.');
   return amount;
 }
+export function formatAmountInput(value: string): string {
+  if (!/^\d+$/.test(value)) return value;
+  return value.replace(/^0+(?=\d)/,'').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+}
+export function parseAmountInput(input: string, allowZero = false): number {
+  if (!/^(?:\d+|[1-9]\d{0,2}(?:\.\d{3})+)$/.test(input)) throw new Error('Enter a whole rupiah amount.');
+  return parseRupiah(input.replaceAll('.',''),allowZero);
+}
 export function safeSum(values: number[]): number {
   const total = values.reduce((sum, value) => {
     if (!Number.isSafeInteger(value)) throw new Error('This amount exceeds the supported range.');

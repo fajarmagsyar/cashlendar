@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .next-auth/
+.next-baseline/
 .env*
 !.env.example
 *.tsbuildinfo

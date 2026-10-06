@@ -17,3 +17,14 @@ Fresh read-only review completed. Both important findings were corrected: serial
 Verification: 10 domain/database/worker tests, 14 authenticated browser tests, and 6 baseline production browser tests. Production build, TypeScript, and lint passed. A final baseline run exposed a test-discovery configuration error: it also selected authenticated tests without their fixture server. The baseline configuration now explicitly selects app.spec.ts; the authenticated suite has a separate documented command. See verification.md for results and limits.
 
 No external project was created, no invitation was sent, and no deployment or Git commit was performed. Setup and deployment steps are in README.md.
+
+UI and planning update: implemented the requested glass navigation dock, six accessible mobile destinations, concise signed-in page copy, amount-first entry sheets, grouped IDR inputs across transaction/account/goal forms, and planned expenses. Added migration 202610060002; the original schema file remains unchanged. Plans are separate from actual cash flow and are consumed atomically when paid. Reporting returns all monthly plans as JSON, avoiding API row truncation.
+
+Checks for this update: 13 domain/database/worker tests and 24 authenticated browser checks passed, plus 6 production baseline/PWA checks. These include the native fieldset scroll regression at 320 × 600 and amount cursor editing. A fresh read-only review found no important defects. Contrast and screenshots were checked. The user reports their original hosted installation works; this update does not apply SQL to that hosted project or deploy to Vercel. README.md specifies the one new migration to apply before deployment.
+
+
+## Money workspace / recorder / XLSX — 2026-10-06
+
+Implemented shared Calendar/List/Charts tabs, mobile central dock creation, original recorder visibility, authenticated filtered XLSX export and migration 003. Added database/workbook unit coverage and browser scenarios; existing browser navigation expectations updated. Fifteen unit tests, lint and types passed; explicit-Node production build passed. Browser execution is blocked by local server socket permissions. Independent read-only review found no critical/important issues. Hosted migration and deployment remain manual.
+
+Ruling: continue authorized implementation directly under the developer autonomy instructions; no repeat design approval. Existing date-picker work preserved. No git/worktree operations because the repository metadata is read-only. Export covers the selected month and all current filters; plans use a separate sheet so recorded financial totals remain unchanged.

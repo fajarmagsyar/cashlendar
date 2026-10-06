@@ -3,7 +3,8 @@ import { revalidatePath } from 'next/cache';
 import { unstable_rethrow } from 'next/navigation';
 import { z } from 'zod';
 import { requireHousehold } from '@/lib/supabase/server';
-import { entrySchema, accountSchema, categorySchema, goalSchema } from './schemas';
+import { entrySchema, accountSchema, categorySchema, goalSchema, plannedExpenseSchema } from './schemas';
+import { validDate,todayJakarta } from '@/lib/finance/dates';
 import type { ActionResult } from '@/lib/finance/types';
 
 function refresh() { for (const path of ['/', '/charts', '/list', '/accounts', '/savings', '/family']) revalidatePath(path); }
@@ -26,6 +27,36 @@ export async function saveEntry(input: Record<string,string>): Promise<ActionRes
     if (error || !data) throw new Error(error?.message || 'This entry is no longer available.');
     refresh(); return { ok:true };
   } catch (error) { return failure(error); }
+}
+export async function savePlannedExpense(input:Record<string,string>):Promise<ActionResult> {
+  try {
+    const { id,...values }=plannedExpenseSchema.parse(input);
+    const { supabase,household }=await requireHousehold();
+    const row={...values,household_id:household.id};
+    const query=id ? supabase.from('planned_expenses').update(row).eq('id',id).eq('household_id',household.id) : supabase.from('planned_expenses').insert(row);
+    const { error }=await query.select('id').single();
+    if(error) throw new Error(error.message);
+    refresh();return {ok:true};
+  }catch(error){return failure(error);}
+}
+export async function deletePlannedExpense(id:string):Promise<ActionResult> {
+  try {
+    z.uuid().parse(id);
+    const {supabase,household}=await requireHousehold();
+    const {error}=await supabase.from('planned_expenses').delete().eq('id',id).eq('household_id',household.id).select('id').single();
+    if(error) throw new Error('This plan is no longer available.');
+    refresh();return {ok:true};
+  }catch(error){return failure(error);}
+}
+export async function payPlannedExpense(id:string,input:Record<string,string>):Promise<ActionResult> {
+  try {
+    z.uuid().parse(id);
+    const {date}=z.object({date:z.string().refine(validDate,'Choose a valid date.').refine(d=>d<=todayJakarta(),'Choose today or an earlier date.')}).parse(input);
+    const {supabase}=await requireHousehold();
+    const {error}=await supabase.rpc('pay_planned_expense',{p_id:id,p_date:date});
+    if(error) throw new Error(error.message);
+    refresh();return {ok:true};
+  }catch(error){return failure(error);}
 }
 export async function deleteEntry(input: { id:string; kind:string }): Promise<ActionResult> {
   try {

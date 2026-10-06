@@ -1,0 +1,129 @@
+/* Shared form controls use the same surface and green selection as the app. */
+select {
+  cursor: pointer;
+  border-color: var(--line);
+  transition: border-color .15s, background-color .15s;
+}
+select:hover:not(:disabled) { border-color: var(--green); }
+select:disabled { cursor: not-allowed; background: var(--bg); }
+select[aria-invalid="true"] { border-color: #a02b2b; }
+
+@supports (appearance: base-select) {
+  select, select::picker(select) { appearance: base-select; }
+  select { align-items: center; gap: 12px; padding-right: 12px; }
+  select::picker-icon { color: var(--muted); font-size: 12px; transition: rotate .15s; }
+  select:open::picker-icon { rotate: 180deg; }
+  select:open { border-color: var(--green); background: var(--green-soft); }
+  select::picker(select) {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px #14261d1a;
+    padding: 6px;
+    margin-block: 6px;
+    min-width: anchor-size(width);
+    max-width: calc(100vw - 24px);
+    max-height: min(320px, 60dvh);
+    overflow: auto;
+  }
+  select option {
+    color: var(--text);
+    background: var(--surface);
+    font-size: 14px;
+    line-height: 1.4;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 7px;
+    gap: 12px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  select option:hover, select option:focus { background: var(--green-soft); }
+  select option:checked { background: var(--green-soft); color: var(--green); font-weight: 600; }
+  select option::checkmark { color: var(--green); order: 1; margin-left: auto; }
+  select option:disabled { color: var(--muted); }
+}
+
+.date-control {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #cbd4cc;
+  border-radius: 10px;
+  background: var(--surface);
+}
+.date-control input {
+  flex: 1;
+  width: 0;
+  border: 0;
+  background: none;
+  font-variant-numeric: tabular-nums;
+}
+.date-control input::-webkit-calendar-picker-indicator { display: none; }
+.date-control input:focus-visible { outline: none; }
+.date-control:focus-within { border-color: var(--green); }
+.date-control:has(:focus-visible) { outline: 3px solid #bb7d26; outline-offset: 3px; }
+.date-control:has(input[aria-invalid="true"]) { border-color: #a02b2b; }
+.date-trigger {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin-right: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  color: var(--green);
+  background: none;
+}
+.date-trigger:hover, .date-trigger[aria-expanded="true"] { background: var(--green-soft); }
+.date-popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  width: min(320px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 12px 36px #14261d26;
+}
+.date-picker-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.date-picker-heading h3 { margin: 0; font-size: 15px; }
+.date-picker-heading button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--green);
+}
+.date-weekdays, .date-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.date-weekdays { margin-bottom: 6px; color: var(--muted); font-size: 11px; font-weight: 600; text-align: center; }
+.date-weekdays span { padding-block: 5px; }
+.date-days button {
+  min-height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.date-days button:hover:not(:disabled), .date-picker-heading button:hover:not(:disabled) { background: var(--green-soft); }
+.date-days button[aria-current="date"] { border-color: var(--green); color: var(--green); font-weight: 600; }
+.date-days button[aria-pressed="true"], .date-days button[aria-pressed="true"]:hover { background: var(--green); color: white; font-weight: 600; }
+.date-days button:disabled { color: var(--muted); }
+.date-picker-footer { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.date-picker-footer button { border: 0; background: none; color: var(--green); border-radius: 6px; padding: 8px; min-height: 40px; font-size: 12px; font-weight: 600; }
+.date-picker-footer button:hover:not(:disabled) { background: var(--green-soft); }
+@media (prefers-reduced-motion: reduce) { select, select::picker-icon { transition: none; } }
