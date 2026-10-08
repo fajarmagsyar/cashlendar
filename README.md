@@ -63,6 +63,20 @@ Reference: [Supabase Google login](https://supabase.com/docs/guides/auth/social-
 1. Push the application to your own Git repository and import it into Vercel. Select the Next.js framework preset; the build command is `pnpm build`.
 2. Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_APP_URL` to Vercel's environment variables. Use your production origin for `NEXT_PUBLIC_APP_URL`.
 3. Deploy, then update Supabase Site URL and its redirect allowlist to match the HTTPS deployment URL.
+
+### Google login redirects to localhost after deployment
+
+For the current production domain, set these exact values:
+
+- Supabase → Authentication → URL Configuration → Site URL: `https://cashlendar-phi.vercel.app`
+- Supabase → Authentication → URL Configuration → Redirect URLs: `https://cashlendar-phi.vercel.app/auth/callback**`
+- Vercel → Project Settings → Environment Variables → `NEXT_PUBLIC_APP_URL`: `https://cashlendar-phi.vercel.app` (Production)
+
+The callback allowlist includes `**` because Cashlendar sends a `next` query parameter, including for invitations and Profile account switching. Local development may retain its separate localhost callback entry. Google Cloud's authorized redirect URI remains your Supabase project's `https://YOUR_PROJECT.supabase.co/auth/v1/callback`.
+
+Save the settings and redeploy the app after changing Vercel environment variables or callback code. Start a fresh Google sign-in from the production login page; do not reuse the previous OAuth callback link. Supabase can fall back to its Site URL when the requested callback is not allowed. The server callback now resolves Vercel's public forwarded host, then the configured production origin, instead of assuming an internal request URL is public. Local development stays on the local request origin.
+
+References: [Supabase redirect configuration](https://supabase.com/docs/guides/auth/redirect-urls), [Vercel request headers](https://vercel.com/docs/headers/request-headers).
 4. Redeploy after changing public environment variables, because Next.js includes them in the browser build.
 5. Test Google login, household creation, a second member's invitation, and household isolation before entering real finances.
 

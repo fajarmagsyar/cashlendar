@@ -1,11 +1,12 @@
 import 'server-only';
+import { cache } from 'react';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { supabaseConfig } from './config';
 import type { Household, Membership } from '../finance/types';
 
-export async function getServerSupabase() {
+export const getServerSupabase = cache(async function getServerSupabase() {
   const config = supabaseConfig();
   if (!config) throw new Error('Supabase is not configured.');
   const cookieStore = await cookies();
@@ -16,7 +17,7 @@ export async function getServerSupabase() {
       catch { /* Server Component cookies are refreshed by the request proxy. */ }
     }
   } });
-}
+});
 export async function requireUser(next = '/') {
   if (!supabaseConfig()) redirect('/login');
   const supabase = await getServerSupabase();
@@ -24,7 +25,7 @@ export async function requireUser(next = '/') {
   if (error || !data.user) redirect(`/login?next=${encodeURIComponent(next)}`);
   return { supabase, user:data.user };
 }
-export async function requireHousehold() {
+export const requireHousehold = cache(async function requireHousehold() {
   const { supabase, user } = await requireUser();
   const { data:membership, error } = await supabase.from('household_members').select('*').eq('user_id', user.id).maybeSingle();
   if (error) throw new Error('Could not load your household. Please try again.');
@@ -32,4 +33,4 @@ export async function requireHousehold() {
   const { data:household, error:householdError } = await supabase.from('households').select('id,name,owner_id').eq('id', membership.household_id).single();
   if (householdError) throw new Error('Could not load your household.');
   return { supabase, user, membership:membership as Membership, household:household as Household };
-}
+});

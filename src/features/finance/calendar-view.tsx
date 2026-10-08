@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/pending-link';
 import type { EntryFilters, FinanceSummary,PlannedExpense } from '@/lib/finance/types';
 import { calendarDays, todayJakarta, dayLabel } from '@/lib/finance/dates';
 import { compactRupiah, formatRupiah } from '@/lib/finance/money';

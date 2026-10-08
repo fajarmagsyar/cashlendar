@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '@/components/pending-link';
 import {useRef,type KeyboardEvent} from 'react';
 import type {EntryFilters,FinanceView} from '@/lib/finance/types';
 import {filterUrl} from './filters';

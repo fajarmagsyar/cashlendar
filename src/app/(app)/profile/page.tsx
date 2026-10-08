@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/pending-link';
 import {Icon} from '@/components/icon';
 import {requireHousehold} from '@/lib/supabase/server';
 import {getProfile} from '@/features/profile/queries';

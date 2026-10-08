@@ -33,3 +33,7 @@ Ruling: continue authorized implementation directly under the developer autonomy
 ## Profile / Settings — 2026-10-06
 
 Added Profile and Settings, replaced Family with Profile in navigation, moved signed-in logout into Profile, added self-only name editing and Google credential management/account switching, and linked Family from Profile. User confirmed Google-only login. Language and currency remain disabled Soon. Review caught global scope on account switching; corrected to local scope with a browser transport regression scenario. All 17 unit checks and the production build pass; current browser execution remains blocked. Profile uses existing policies and needs no additional migration.
+
+## OAuth localhost redirect — deployed domain
+
+User reports https://cashlendar-phi.vercel.app redirects to localhost after Google login. Fixed server callback public-origin resolution and documented exact Supabase Site URL, /auth/callback** allowlist, Vercel NEXT_PUBLIC_APP_URL and redeployment. Browser login already used its real origin. The live unauthenticated callback returned 307 to the correct production login origin. Provider Site URL/allowlist fallback is therefore the leading hypothesis; hosted settings could not be inspected. All21 unit checks, lint and types pass. No hosted settings were changed.

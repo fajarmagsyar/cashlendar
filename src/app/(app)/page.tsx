@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/pending-link';
 import {ChartsView} from '@/features/finance/charts-view';
 import {ViewTabs} from '@/features/finance/view-tabs';
 import {ExportButton} from '@/features/finance/export-button';

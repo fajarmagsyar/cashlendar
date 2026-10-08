@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { z } from 'zod';
 import { requireHousehold } from '@/lib/supabase/server';
 import { checkedNumber } from '@/lib/finance/money';
@@ -12,18 +13,18 @@ export function readFilters(params: Record<string,string|string[]|undefined>): E
   const uuid = (value:string) => z.uuid().safeParse(value).success ? value : '';
   return { view:text('view')==='list' ? 'list' : text('view')==='charts' ? 'charts' : 'calendar', month, account:uuid(text('account')), category:uuid(text('category')), kind:['income','expense','transfer'].includes(text('kind')) ? text('kind') : '', search:text('search').slice(0,100), page:Math.min(100000, Math.max(1, Number.parseInt(text('page')) || 1)) };
 }
-export async function getAccounts(): Promise<Account[]> {
+export const getAccounts = cache(async function getAccounts(): Promise<Account[]> {
   const { supabase, household } = await requireHousehold();
   const [accounts, balances] = await Promise.all([supabase.from('accounts').select('*').eq('household_id',household.id).order('name'),supabase.rpc('account_balances')]);
   if (accounts.error || balances.error) throw new Error(accounts.error?.message || balances.error?.message);
   const byId = new Map((balances.data as { account_id:string; balance:string }[]).map(a => [a.account_id,checkedNumber(a.balance)]));
   return accounts.data.map(a => ({ ...a, opening_balance:checkedNumber(a.opening_balance), balance:byId.get(a.id) ?? checkedNumber(a.opening_balance) })) as Account[];
-}
-export async function getCategories(): Promise<Category[]> {
+});
+export const getCategories = cache(async function getCategories(): Promise<Category[]> {
   const { supabase, household } = await requireHousehold();
   const { data, error } = await supabase.from('categories').select('*').eq('household_id',household.id).order('name');
   if (error) throw new Error(error.message); return data as Category[];
-}
+});
 export async function getGoals(): Promise<SavingsGoal[]> {
   const { supabase, household } = await requireHousehold();
   const { data, error } = await supabase.from('savings_goals').select('*').eq('household_id',household.id).order('name');

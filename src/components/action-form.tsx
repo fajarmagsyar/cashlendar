@@ -1,6 +1,5 @@
 'use client';
 import { useState, useId, cloneElement, isValidElement, createContext, useContext, type ReactElement, type ReactNode, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import type { ActionResult } from '@/lib/finance/types';
 const FormErrors = createContext<Record<string,string>>({});
 export function ActionForm({ children, action, submit='Save', onSuccess,className='' }: {
@@ -8,7 +7,6 @@ export function ActionForm({ children, action, submit='Save', onSuccess,classNam
 }) {
   const [pending,setPending] = useState(false);
   const [result,setResult] = useState<ActionResult<unknown> | null>(null);
-  const router = useRouter();
   async function send(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
@@ -18,7 +16,7 @@ export function ActionForm({ children, action, submit='Save', onSuccess,classNam
     try {
       const response = await action(Object.fromEntries(Array.from(new FormData(form).entries()).map(([k,v]) => [k,String(v)])));
       setResult(response);
-      if (response.ok) { onSuccess?.(); router.refresh(); }
+      if (response.ok) { onSuccess?.(); }
     } catch { setResult({ ok:false,error:'Could not connect. Your input is still here; please try again.' }); }
     finally { setPending(false); }
   }

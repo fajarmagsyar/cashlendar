@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import Link from '@/components/pending-link';
 import {usePathname,useRouter,useSearchParams} from 'next/navigation';
 import {useEffect} from 'react';
 import {Icon,type IconName} from './icon';

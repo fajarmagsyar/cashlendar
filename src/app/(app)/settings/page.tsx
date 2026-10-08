@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/pending-link';
 import {Icon} from '@/components/icon';
 export default function Settings() {
   return <><Link className="text-button profile-back" href="/profile" aria-label="Back to profile"><Icon name="left" size={18}/>Profile</Link><div className="page-heading"><h1>Settings</h1></div>

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/pending-link';
 import { getAccounts,getCategories,getGoals } from '@/features/finance/queries';
 import { formatRupiah } from '@/lib/finance/money';
 import { savingsProgress } from '@/lib/finance/calculations';

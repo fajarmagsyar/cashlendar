@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/pending-link';
 import {getAccounts,getCategories} from '@/features/finance/queries';
 import { Navigation } from '@/components/navigation';
 import { Icon } from '@/components/icon';
