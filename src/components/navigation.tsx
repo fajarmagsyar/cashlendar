@@ -22,10 +22,10 @@ export function Navigation({accounts,categories}:{accounts:Account[];categories:
   try {getMonthRange(month);} catch {month=todayJakarta().slice(0,7);}
   const date=path!=='/' ? todayJakarta() : validDate(selected) && selected.slice(0,7)===month ? selected : month===todayJakarta().slice(0,7) ? todayJakarta() : `${month}-01`;
   useEffect(()=>{
-    const refresh=()=>{if(document.visibilityState==='visible' && navigator.onLine) router.refresh();};
+    const refresh=()=>{if(!path.startsWith('/board/') && document.visibilityState==='visible' && navigator.onLine) router.refresh();};
     document.addEventListener('visibilitychange',refresh);window.addEventListener('online',refresh);
     return ()=>{document.removeEventListener('visibilitychange',refresh);window.removeEventListener('online',refresh);};
-  },[router]);
+  },[router,path]);
   const active=(link:typeof links[number])=>link.href==='/profile' ? ['/profile','/settings','/family'].includes(path) : link.href==='/more' ? ['/more','/savings','/board'].includes(path) : path===link.href;
   const visualUrl=pending && destination ? new URL(destination,'https://cashlendar.local') : null;
   const visualPath=visualUrl?.pathname || path;
@@ -36,6 +36,7 @@ export function Navigation({accounts,categories}:{accounts:Account[];categories:
     setDestination(href);
     startTransition(()=>router.push(href));
   }
+  if(path.startsWith('/board/')) return null;
   return <>
     <nav aria-label={t("Main navigation")} className="navigation glass-navigation desktop-navigation" style={{'--active-index':desktopIndex} as CSSProperties}>
       <span className="navigation-indicator" aria-hidden="true"/>

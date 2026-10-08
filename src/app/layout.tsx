@@ -5,6 +5,7 @@ import { PwaRegistration } from '@/components/pwa';
 import './globals.css';
 import '@/components/pickers.css';
 import '@/components/microinteractions.css';
+import '@/features/board/board-editor.css';
 const baseMetadata: Metadata = {
   title: { default:'Cashlendar',template:'%s · Cashlendar' }, description:'Your household money, one day at a time.',
   applicationName:'Cashlendar', appleWebApp:{ capable:true,statusBarStyle:'default',title:'Cashlendar' },

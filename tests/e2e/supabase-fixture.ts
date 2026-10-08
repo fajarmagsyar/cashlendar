@@ -56,7 +56,7 @@ function identity(value:string|undefined){
   } catch {return null;}
 }
 const tables=new Set(['profiles','households','household_members','invitations','accounts','categories','transactions','transfers','savings_goals','planned_expenses','board_items','push_subscriptions']);
-const rpcs=new Set(['create_household','create_invitation','accept_invitation','remove_member','revoke_invitation','account_balances','list_entries','finance_summary','list_planned_expenses','pay_planned_expense','export_finances','set_board_task','set_board_reminder','subscribe_board_push']);
+const rpcs=new Set(['create_household','create_invitation','accept_invitation','remove_member','revoke_invitation','account_balances','list_entries','finance_summary','list_planned_expenses','pay_planned_expense','export_finances','set_board_task','set_board_document_task','set_board_reminder','subscribe_board_push']);
 const identifier=(value:string)=>{if(!/^[a-z_][a-z0-9_]*$/.test(value)) throw new Error('Invalid fixture identifier');return `"${value}"`;};
 createServer(async(req,res)=>{
   const url=new URL(req.url || '/','http://127.0.0.1:54329');

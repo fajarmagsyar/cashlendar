@@ -1,0 +1,77 @@
+.board-search {flex:1;max-width:480px}
+.board-search input {width:100%}
+.board-page h2 a {color:inherit;text-decoration:none}
+.board-page h2 a:hover {text-decoration:underline;text-underline-offset:4px}
+.board-page-preview {display:flex;flex-direction:column;gap:12px;max-height:330px;overflow:auto;scrollbar-width:thin}
+.board-page-preview .board-body {margin:0;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.board-page-preview .preview-heading {font-size:1.1rem}
+.board-page-preview .page-sheet,.board-page-preview .page-drawing {min-width:0}
+.board-page-preview .drawing-canvas {max-height:150px}
+.app-shell:has(.board-editor) .app-header {display:none}
+.app-shell:has(.board-editor) .app-content {padding-bottom:24px}
+.board-editor {max-width:940px;margin:0 auto;padding:8px 0 36px}
+.page-editor-heading {position:sticky;top:0;z-index:6;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;font-size:.85rem}
+.page-editor-heading>span {margin-left:auto}
+.page-editor-heading button {display:flex;align-items:center;gap:6px;min-height:44px}
+.board-editor>h1 {font-size:1.1rem;margin:0 0 24px;color:var(--muted)}
+.page-editor-form input.page-title-input {font-size:clamp(1.5rem,4vw,2.4rem);font-weight:650;letter-spacing:-.025em;padding:14px!important}
+.page-editor-form .form-fields>fieldset {display:flex;flex-direction:column;gap:24px;min-width:0}
+.page-blocks {display:flex;flex-direction:column;gap:18px;min-width:0}
+.page-block {border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;animation:board-block-in .18s ease-out both}
+.block-controls {display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid var(--line);background:var(--bg);color:var(--muted);font-size:.8rem;gap:8px}
+.block-controls>div {display:flex;gap:4px}
+.block-controls button,.page-task>button {display:grid;place-items:center;min-width:38px;min-height:38px;background:transparent;border:0;border-radius:6px;color:inherit}
+.block-controls button:hover,.page-task>button:hover {background:var(--line)}
+.block-controls button:disabled {opacity:.4}
+.text-format-tools,.sheet-tools,.drawing-tools {display:flex;gap:6px;padding:10px 12px;flex-wrap:wrap;align-items:center}
+.text-format-tools button,.sheet-tools button,.drawing-tools button {background:transparent;color:var(--text);border:1px solid var(--line);border-radius:6px;min-height:40px;padding:6px 10px;font-size:.82rem}
+.text-format-tools button[aria-pressed=true],.drawing-tools button[aria-pressed=true] {background:var(--green);color:#fff;border-color:var(--green)}
+.sheet-tools button:disabled,.drawing-tools button:disabled {opacity:.45}
+.page-block textarea.page-text {width:100%;border:0;border-radius:0;background:transparent;padding:14px 18px;resize:vertical;line-height:1.7;min-height:90px}
+.page-text-heading {font-size:1.35rem;line-height:1.4!important}
+.page-checklist {padding:12px}
+.page-task {display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.page-task input[type=checkbox],.reminder-toggle input {accent-color:var(--green);width:22px;height:22px;flex:none}
+.page-task input:not([type=checkbox]) {min-width:0;flex:1}
+.page-task:has(input:checked) input:not([type=checkbox]) {text-decoration:line-through;color:var(--muted)}
+.add-block-tools {display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 0}
+.add-block-tools>span {font-size:.85rem;color:var(--muted);margin-right:4px}
+.add-block-tools .button {min-height:44px;padding:9px 12px;font-size:.85rem}
+.page-reminder-settings {padding:20px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.reminder-toggle {display:flex;align-items:center;gap:12px;min-height:44px;font-weight:600}
+.page-reminder-settings p {font-size:.85rem;margin:0}
+.page-editor-form>button[type=submit] {position:sticky;bottom:18px;align-self:flex-end;min-width:140px;box-shadow:0 2px 10px #26382c18;z-index:5}
+.sheet-scroll {overflow-x:auto;max-width:100%;overscroll-behavior-x:contain}
+.page-sheet table {border-collapse:collapse;width:100%;table-layout:fixed;min-width:360px;font-size:.85rem}
+.page-sheet th,.page-sheet td {border:1px solid var(--line);padding:0;min-width:100px}
+.page-sheet th {background:var(--bg);color:var(--muted);font-weight:500;height:30px;text-align:center}
+.page-sheet tr>th:first-child {width:38px}
+.page-sheet td>input {border:0!important;border-radius:0!important;background:transparent;width:100%;min-width:0;padding:10px 8px!important;font-size:.85rem;box-shadow:none!important}
+.page-sheet td>input:focus {outline:2px solid var(--green);outline-offset:-2px}
+.page-sheet td>span {display:block;padding:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet-formula {background:#eff7ef}
+.sheet-error {color:#a32626;background:#fff2ef}
+.sheet-help {padding:10px 12px;font-size:.78rem;line-height:1.7;color:var(--muted);margin:0}
+.sheet-help code {color:var(--text);font-size:.78rem}
+.drawing-tools label {display:flex;align-items:center;gap:6px;font-size:.8rem}
+.drawing-tools select {padding:5px;width:auto}
+.drawing-tools button:has(span) {min-width:40px;padding:8px}
+.drawing-tools button>span {display:block;width:18px;height:18px;border-radius:50%;border:1px solid #fff}
+.drawing-canvas {display:block;width:100%;height:auto;background:#fafbf7;border-top:1px solid var(--line);aspect-ratio:5/3}
+.drawing-canvas.editable {touch-action:none;cursor:crosshair;user-select:none}
+.drawing-canvas.erasing {cursor:pointer}
+.page-drawing>small {display:block;padding:8px 12px}
+@keyframes board-block-in {from {opacity:0;transform:translateY(4px)}to {opacity:1;transform:none}}
+@media(max-width:600px) {
+  .board-toolbar {gap:10px;flex-wrap:wrap}
+  .board-search {min-width:150px}
+  .board-editor {padding-top:0}
+  .page-editor-heading {align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .page-editor-heading>span {order:3;text-align:left!important;flex-basis:100%;max-width:none!important;padding-top:0!important;font-size:.8rem}
+  .page-editor-heading>.button {margin-left:auto}
+  .page-editor-heading>span {text-align:right;max-width:130px;padding-top:12px}
+  .page-editor-form .form-fields>fieldset {gap:18px}
+  .add-block-tools>span {flex-basis:100%}
+  .board-page-preview {max-height:280px}
+}
+@media(prefers-reduced-motion:reduce) {.page-block {animation:none}}
