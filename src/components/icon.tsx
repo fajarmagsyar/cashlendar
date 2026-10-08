@@ -1,6 +1,24 @@
 import type { CSSProperties } from 'react';
-export type IconName = 'tools'|'board'|'bell'|'calendar'|'chart'|'list'|'wallet'|'savings'|'family'|'plus'|'left'|'right'|'close'|'logout'|'arrow'|'check'|'download'|'profile'|'settings';
+export type IconName = 'text'|'checklist'|'table'|'pen'|'heading'|'bold'|'italic'|'up'|'down'|'trash'|'undo'|'eraser'|'row-add'|'column-add'|'row-remove'|'column-remove'|'info'|'save'|'tools'|'board'|'bell'|'calendar'|'chart'|'list'|'wallet'|'savings'|'family'|'plus'|'left'|'right'|'close'|'logout'|'arrow'|'check'|'download'|'profile'|'settings';
 const paths: Record<IconName,string> = {
+  text:'M4 5h16M12 5v15M8 20h8',
+  checklist:'M4 4h5v5H4zM13 6h7M4 14l2 2 4-4M13 15h7M13 20h7',
+  table:'M3 4h18v16H3zM3 9h18M3 14h18M9 4v16M15 4v16',
+  pen:'m4 16 12-12 4 4L8 20H4v-4zM13 7l4 4',
+  heading:'M5 5v14M15 5v14M5 12h10M19 13v6M18 14l1-1',
+  bold:'M7 4h6a4 4 0 0 1 0 8H7V4zM7 12h7a4 4 0 0 1 0 8H7v-8z',
+  italic:'M10 4h9M5 20h9M15 4 9 20',
+  up:'M12 20V4m-6 6 6-6 6 6',down:'M12 4v16m-6-6 6 6 6-6',
+  trash:'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',
+  undo:'M9 4 4 9l5 5M4 9h10a6 6 0 0 1 0 12',
+  eraser:'m3 14 10-10a2 2 0 0 1 3 0l5 5-11 11H7l-4-4a2 2 0 0 1 0-2zM8 9l8 8M10 20h11',
+  'row-add':'M3 3h18v9H3zM3 8h18M12 15v6M9 18h6',
+  'column-add':'M3 3h9v18H3zM8 3v18M15 12h6M18 9v6',
+  'row-remove':'M3 3h18v9H3zM3 8h18M9 18h6',
+  'column-remove':'M3 3h9v18H3zM8 3v18M15 12h6',
+  info:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M12 11v6M12 7h.01',
+  save:'M4 3h13l4 4v14H3V3h1zM7 3v6h10V3M7 21v-8h10v8',
+
   tools:'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
   board:'M5 3h14v18H5zM8 7h8M8 11h8M8 15h5',
   bell:'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4',

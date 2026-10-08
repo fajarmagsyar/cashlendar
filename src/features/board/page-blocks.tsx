@@ -1,11 +1,14 @@
 'use client';
-import {useRef,useState,type PointerEvent} from 'react';
+import {useId,useRef,useState,type PointerEvent,type CSSProperties} from 'react';
+import {Icon} from '@/components/icon';
+import {EditorAction} from './editor-action';
 import {useI18n} from '@/components/language-provider';
 import {evaluateSheet} from './formulas';
 import type {DrawingBlock,TableBlock} from './document';
 
 export function Sheet({block,onChange}:{block:TableBlock;onChange?:(block:TableBlock)=>void}) {
-  const {t,locale}=useI18n();const [focused,setFocused]=useState('');
+  const {t,locale}=useI18n();const [focused,setFocused]=useState(''),[showHelp,setShowHelp]=useState(false);
+  const helpId=useId();
   const values=evaluateSheet(block.cells),columns=block.cells[0].length;
   const label=(r:number,c:number)=>`${String.fromCharCode(65+c)}${r+1}`;
   function change(r:number,c:number,value:string){onChange?.({...block,cells:block.cells.map((row,i)=>i===r ? row.map((cell,j)=>j===c ? value : cell) : row)});}
@@ -15,12 +18,12 @@ export function Sheet({block,onChange}:{block:TableBlock;onChange?:(block:TableB
     onChange?.({...block,cells:axis==='row' ? block.cells.slice(0,-1) : block.cells.map(row=>row.slice(0,-1))});
   }
   return <div className="page-sheet">
-    {onChange && <div className="sheet-tools"><button type="button" disabled={block.cells.length>=30} onClick={()=>onChange({...block,cells:[...block.cells,Array(columns).fill('')]})}>{t('Add row')}</button><button type="button" disabled={columns>=12} onClick={()=>onChange({...block,cells:block.cells.map(row=>[...row,''])})}>{t('Add column')}</button><button type="button" disabled={block.cells.length<=1} onClick={()=>shrink('row')}>{t('Remove row')}</button><button type="button" disabled={columns<=1} onClick={()=>shrink('column')}>{t('Remove column')}</button></div>}
-    <div className="sheet-scroll" tabIndex={0} role="region" aria-label={t('Table')}><table style={{minWidth:columns*112+38}}><thead><tr><th aria-label={t('Row')}/>{block.cells[0].map((_,c)=><th key={c} scope="col">{String.fromCharCode(65+c)}</th>)}</tr></thead><tbody>{block.cells.map((row,r)=><tr key={r}><th scope="row">{r+1}</th>{row.map((raw,c)=>{
+    {onChange && <div className="sheet-tools"><EditorAction label="Add row" icon="row-add" disabled={block.cells.length>=30} onClick={()=>onChange({...block,cells:[...block.cells,Array(columns).fill('')]})}/><EditorAction label="Add column" icon="column-add" disabled={columns>=12} onClick={()=>onChange({...block,cells:block.cells.map(row=>[...row,''])})}/><EditorAction label="Remove row" icon="row-remove" disabled={block.cells.length<=1} onClick={()=>shrink('row')}/><EditorAction label="Remove column" icon="column-remove" disabled={columns<=1} onClick={()=>shrink('column')}/><EditorAction label="Formula help" icon="info" aria-expanded={showHelp} aria-controls={helpId} onClick={()=>setShowHelp(!showHelp)}/></div>}
+    <div className="sheet-scroll" tabIndex={0} role="region" aria-label={t('Table')}><table style={{'--sheet-width':`${columns*112+38}px`,'--sheet-mobile-width':`${columns*72+28}px`} as CSSProperties}><thead><tr><th aria-label={t('Row')}/>{block.cells[0].map((_,c)=><th key={c} scope="col">{String.fromCharCode(65+c)}</th>)}</tr></thead><tbody>{block.cells.map((row,r)=><tr key={r}><th scope="row">{r+1}</th>{row.map((raw,c)=>{
       const result=values[r][c],display=result.error || (typeof result.value==='number' ? new Intl.NumberFormat(locale,{maximumFractionDigits:8}).format(result.value) : result.value);
       return <td key={c} className={result.error ? 'sheet-error' : raw.startsWith('=') ? 'sheet-formula' : ''}>{onChange ? <input aria-label={t('Cell {cell}',{cell:label(r,c)})} maxLength={500} value={focused===label(r,c) ? raw : display} onFocus={()=>setFocused(label(r,c))} onBlur={()=>setFocused('')} onChange={event=>change(r,c,event.target.value)} aria-invalid={Boolean(result.error)} title={raw.startsWith('=') ? raw : undefined}/> : <span title={raw.startsWith('=') ? raw : undefined}>{display || '\u00a0'}</span>}</td>;
     })}</tr>)}</tbody></table></div>
-    {onChange && <p className="sheet-help">{t('Start with = to calculate.')} <code>=A1+B1</code> · <code>=SUM(A1:A5)</code><br/>{t('Available: SUM, AVERAGE, MIN, MAX, COUNT. References stay in this table.')}</p>}
+    {onChange && <p id={helpId} hidden={!showHelp} className="sheet-help">{t('Start with = to calculate.')} <code>=A1+B1</code> · <code>=SUM(A1:A5)</code><br/>{t('Available: SUM, AVERAGE, MIN, MAX, COUNT. References stay in this table.')}</p>}
   </div>;
 }
 const colors={ink:'#283b32',green:'#2d7548',red:'#b23b3b',blue:'#326caa'};
@@ -51,11 +54,11 @@ export function Drawing({block,onChange,disabled=false}:{block:DrawingBlock;onCh
   }
   return <div className="page-drawing">
     {onChange && <div className="drawing-tools" role="group" aria-label={t('Drawing tools')}>
-      {(Object.keys(colors) as (keyof typeof colors)[]).map(option=><button key={option} type="button" aria-label={t({ink:'Black pen',green:'Green pen',red:'Red pen',blue:'Blue pen'}[option])} aria-pressed={color===option && !eraser} onClick={()=>{setColor(option);setEraser(false);}}><span style={{background:colors[option]}}/></button>)}
-      <label>{t('Pen width')}<select value={width} onChange={event=>setWidth(Number(event.target.value))}>{[2,4,8].map(size=><option key={size} value={size}>{size}</option>)}</select></label>
-      <button type="button" aria-pressed={eraser} onClick={()=>setEraser(!eraser)}>{t('Eraser')}</button>
-      <button type="button" disabled={!block.strokes.length} onClick={()=>onChange({...block,strokes:block.strokes.slice(0,-1)})}>{t('Undo stroke')}</button>
-      <button type="button" disabled={!block.strokes.length} onClick={()=>{if(window.confirm(t('Clear this drawing?'))) onChange({...block,strokes:[]});}}>{t('Clear')}</button>
+      {(Object.keys(colors) as (keyof typeof colors)[]).map(option=><EditorAction key={option} label={{ink:'Black pen',green:'Green pen',red:'Red pen',blue:'Blue pen'}[option]} icon="pen" aria-pressed={color===option && !eraser} onClick={()=>{setColor(option);setEraser(false);}}><Icon name="pen" style={{color:colors[option]}}/></EditorAction>)}
+      <label className="pen-width" title={t('Pen width')}><Icon name="settings"/><span className="sr-only">{t('Pen width')}</span><select value={width} onChange={event=>setWidth(Number(event.target.value))}>{[2,4,8].map(size=><option key={size} value={size}>{size}</option>)}</select></label>
+      <EditorAction label="Eraser" icon="eraser" aria-pressed={eraser} onClick={()=>setEraser(!eraser)}/>
+      <EditorAction label="Undo stroke" icon="undo" disabled={!block.strokes.length} onClick={()=>onChange({...block,strokes:block.strokes.slice(0,-1)})}/>
+      <EditorAction label="Clear" icon="trash" disabled={!block.strokes.length} onClick={()=>{if(window.confirm(t('Clear this drawing?'))) onChange({...block,strokes:[]});}}/>
     </div>}
     <svg className={`drawing-canvas ${onChange ? 'editable' : ''} ${eraser ? 'erasing' : ''}`} viewBox="0 0 1000 600" role="img" aria-label={t('Drawing canvas')} style={{pointerEvents:disabled ? 'none' : undefined}} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish}>
       <title>{t('Drawing canvas')}</title>
@@ -64,6 +67,7 @@ export function Drawing({block,onChange,disabled=false}:{block:DrawingBlock;onCh
         return <polyline key={stroke.id} points={points.map(point=>point.join(',')).join(' ')} fill="none" stroke={colors[stroke.color]} strokeWidth={stroke.width} strokeLinecap="round" strokeLinejoin="round" onPointerDown={onChange && eraser ? event=>{event.stopPropagation();onChange({...block,strokes:block.strokes.filter(s=>s.id!==stroke.id)});} : undefined}/>;
       })}
     </svg>
-    {onChange && <small className="muted">{t(eraser ? 'Tap a stroke to erase it.' : 'Draw with your finger, mouse, or pen.')} {total>=12000 || block.strokes.length>=200 ? t('Drawing limit reached. Remove a stroke to continue.') : ''}</small>}
+    {onChange && (total>=12000 || block.strokes.length>=200) && <small role="status" className="muted">{t('Drawing limit reached. Remove a stroke to continue.')}</small>}
+    {onChange && <small className="sr-only">{t(eraser ? 'Tap a stroke to erase it.' : 'Draw with your finger, mouse, or pen.')} </small>}
   </div>;
 }

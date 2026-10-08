@@ -31,6 +31,9 @@ test('one full-page editor combines formatting, tasks, formulas, drawing and rem
   await expect(page.getByRole('heading',{name:'New page',exact:true})).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('navigation',{name:'Main navigation'})).toHaveCount(0);
+  await expect(page.locator('.board-editor button[type=submit]')).toHaveCount(1);
+  expect((await page.locator('.board-editor button').allTextContents()).every(text=>!text.trim())).toBe(true);
+  await expect(page.getByRole('button',{name:'Save page',exact:true})).toHaveAttribute('title','Save page');
   await page.getByLabel('Title',{exact:true}).fill('Family weekend');
   await page.getByLabel('Text block 1').fill('Plans for Saturday');
   await page.getByRole('button',{name:'Heading',exact:true}).click();
@@ -40,6 +43,14 @@ test('one full-page editor combines formatting, tasks, formulas, drawing and rem
   await page.getByLabel('Task 1',{exact:true}).fill('Rice');
   await page.getByRole('button',{name:'Add task',exact:true}).click();await page.getByLabel('Task 2',{exact:true}).fill('Milk');
   await page.getByRole('button',{name:'Table',exact:true}).click();
+  await expect(page.locator('.sheet-help')).toBeHidden();await page.getByRole('button',{name:'Formula help',exact:true}).click();await expect(page.locator('.sheet-help')).toBeVisible();await page.getByRole('button',{name:'Formula help',exact:true}).click();
+  if(testInfo.project.name==='mobile') {
+    const sheet=page.locator('.page-sheet table');
+    expect(await sheet.locator('tbody tr').first().evaluate(element=>element.getBoundingClientRect().height)).toBeLessThanOrEqual(36);
+    expect(await sheet.locator('tbody td').first().evaluate(element=>element.getBoundingClientRect().width)).toBeGreaterThanOrEqual(70);
+    const scroll=page.locator('.sheet-scroll');
+    expect(await scroll.evaluate(element=>element.scrollWidth<=element.clientWidth)).toBe(true);
+  }
   await page.getByLabel('Cell A1',{exact:true}).fill('10');await page.getByLabel('Cell B1',{exact:true}).fill('20');await page.getByLabel('Cell C1',{exact:true}).fill('=SUM(A1:B1)');
   await page.getByRole('button',{name:'Add row',exact:true}).click();await page.getByRole('button',{name:'Add column',exact:true}).click();
   await expect(page.getByLabel('Cell C1',{exact:true})).toHaveValue('30');
@@ -53,13 +64,13 @@ test('one full-page editor combines formatting, tasks, formulas, drawing and rem
   await page.getByRole('button',{name:'Undo stroke',exact:true}).click();await expect(canvas.locator('polyline')).toHaveCount(0);
   await page.mouse.move(box.x+40,box.y+40);await page.mouse.down();await page.mouse.move(box.x+110,box.y+70,{steps:8});await page.mouse.up();
   await expect(canvas.locator('polyline')).toHaveCount(1);
-  await page.getByLabel('Add a reminder',{exact:true}).check();await page.getByLabel('Time',{exact:true}).fill('09:00');
+  await page.getByRole('button',{name:'Add a reminder',exact:true}).click();await page.getByLabel('Time',{exact:true}).fill('09:00');
   for(const width of [320,390,768,1440]) {
     await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   }
   await page.setViewportSize(viewport);
   await page.screenshot({path:`/tmp/cashlendar-board-editor-${testInfo.project.name}.png`,fullPage:true});
-  await page.getByRole('button',{name:'Save',exact:true}).click();
+  await page.getByRole('button',{name:'Save page',exact:true}).click();
   await expect(page).toHaveURL('/board');
   const card=page.getByRole('article',{name:'Family weekend'});
   await expect(card).toContainText('Plans for Saturday');await expect(card.locator('polyline')).toHaveCount(1);
@@ -74,7 +85,7 @@ test('one full-page editor combines formatting, tasks, formulas, drawing and rem
   await page.getByLabel('Cell C1',{exact:true}).focus();await expect(page.getByLabel('Cell C1',{exact:true})).toHaveValue('=SUM(A1:B1)');
   await expect(page.getByRole('img',{name:'Drawing canvas'}).locator('polyline')).toHaveCount(1);
   await page.getByLabel('Text block 1').fill('Bring it on Friday');
-  await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page).toHaveURL('/board');
+  await page.getByRole('button',{name:'Save page',exact:true}).click();await expect(page).toHaveURL('/board');
   const owner=await (await request.get('http://127.0.0.1:54329/test/session')).json();
   await context.addCookies([{name:owner.cookieName,value:owner.cookieValue,domain:'localhost',path:'/'}]);await page.reload();
   await expect(card.getByRole('checkbox',{name:'Rice',exact:true})).toBeChecked();
@@ -125,11 +136,11 @@ test('the tools and full-page editor use Indonesian by default',async({page,cont
 
 test('a newer family edit is preserved and the older full-page draft stays available',async({page,context,request})=>{
   await page.goto('/board');await page.getByRole('link',{name:'New page',exact:true}).first().click();await page.getByLabel('Title',{exact:true}).fill('Shared draft');await page.getByLabel('Text block 1').fill('Original');
-  await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page).toHaveURL('/board');
+  await page.getByRole('button',{name:'Save page',exact:true}).click();await expect(page).toHaveURL('/board');
   await page.getByRole('article',{name:'Shared draft'}).getByRole('link',{name:'Edit',exact:true}).click();await expect(page.getByRole('heading',{name:'Edit page',exact:true})).toBeVisible();await page.getByLabel('Text block 1').fill('My older draft');await expect(page.getByLabel('Text block 1')).toHaveValue('My older draft');
   const second=await context.newPage();await second.goto('/board');await second.getByRole('article',{name:'Shared draft'}).getByRole('link',{name:'Edit',exact:true}).click();await expect(second.getByRole('heading',{name:'Edit page',exact:true})).toBeVisible();
-  await second.getByLabel('Text block 1').fill('Newer family edit');await second.getByRole('button',{name:'Save',exact:true}).click();await expect(second).toHaveURL('/board');
-  await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page.locator('.board-editor').getByRole('alert')).toContainText('This item changed.');await expect(page.getByLabel('Text block 1')).toHaveValue('My older draft');
+  await second.getByLabel('Text block 1').fill('Newer family edit');await second.getByRole('button',{name:'Save page',exact:true}).click();await expect(second).toHaveURL('/board');
+  await page.getByRole('button',{name:'Save page',exact:true}).click();await expect(page.locator('.board-editor').getByRole('alert')).toContainText('This item changed.');await expect(page.getByLabel('Text block 1')).toHaveValue('My older draft');
   page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('button',{name:'Family board',exact:true}).click();await expect(page.getByLabel('Text block 1')).toHaveValue('My older draft');
   page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Family board',exact:true}).click();
   await expect(page.getByRole('article',{name:'Shared draft'})).toContainText('Newer family edit');expect((await request.get('/api/reminders')).status()).toBe(401);await second.close();
@@ -139,7 +150,7 @@ test('failed saves and leaving a page preserve unsaved input',async({page})=>{
   const hydrationErrors:string[]=[];page.on('console',message=>{if(/hydrated|hydration/i.test(message.text())) hydrationErrors.push(message.text());});
   await page.goto('/board/new');await page.getByLabel('Title',{exact:true}).fill('Keep my page');await page.getByLabel('Text block 1').fill('Keep this writing');
   await page.route('**/board/new',route=>route.request().method()==='POST' ? route.abort() : route.continue());
-  await page.getByRole('button',{name:'Save',exact:true}).click();await expect(page.locator('.board-editor').getByRole('alert')).toBeVisible();await expect(page.getByLabel('Text block 1')).toHaveValue('Keep this writing');
+  await page.getByRole('button',{name:'Save page',exact:true}).click();await expect(page.locator('.board-editor').getByRole('alert')).toBeVisible();await expect(page.getByLabel('Text block 1')).toHaveValue('Keep this writing');
   page.once('dialog',dialog=>dialog.dismiss());await page.getByRole('button',{name:'Family board',exact:true}).click();await expect(page).toHaveURL('/board/new');
   await page.unroute('**/board/new');await page.getByRole('button',{name:'Save page',exact:true}).click();await expect(page).toHaveURL('/board');await expect(page.getByRole('article',{name:'Keep my page'})).toContainText('Keep this writing');expect(hydrationErrors).toEqual([]);
 });
@@ -170,7 +181,7 @@ test('block ordering, destructive controls and drawing tools work with keyboard 
 });
 
 test('changing only a reminder calendar date marks the page dirty and prompts before leaving',async({page})=>{
-  await page.goto('/board/new');await page.getByLabel('Title',{exact:true}).fill('Date change');await page.getByLabel('Add a reminder',{exact:true}).check();
+  await page.goto('/board/new');await page.getByLabel('Title',{exact:true}).fill('Date change');await page.getByRole('button',{name:'Add a reminder',exact:true}).click();
   await page.getByRole('button',{name:'Save page',exact:true}).click();await expect(page).toHaveURL('/board');
   await page.getByRole('article',{name:'Date change'}).getByRole('link',{name:'Edit',exact:true}).click();await expect(page.getByRole('heading',{name:'Edit page',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Open date picker',exact:true}).click();

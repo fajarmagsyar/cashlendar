@@ -11,9 +11,9 @@
 .app-shell:has(.board-editor) .app-content {padding-bottom:24px}
 .board-editor {max-width:940px;margin:0 auto;padding:8px 0 36px}
 .page-editor-heading {position:sticky;top:0;z-index:6;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;font-size:.85rem}
-.page-editor-heading>span {margin-left:auto}
+.page-editor-heading h1 {font-size:1rem;letter-spacing:0;margin:0 auto 0 0;color:var(--muted)}
 .page-editor-heading button {display:flex;align-items:center;gap:6px;min-height:44px}
-.board-editor>h1 {font-size:1.1rem;margin:0 0 24px;color:var(--muted)}
+
 .page-editor-form input.page-title-input {font-size:clamp(1.5rem,4vw,2.4rem);font-weight:650;letter-spacing:-.025em;padding:14px!important}
 .page-editor-form .form-fields>fieldset {display:flex;flex-direction:column;gap:24px;min-width:0}
 .page-blocks {display:flex;flex-direction:column;gap:18px;min-width:0}
@@ -40,9 +40,9 @@
 .page-reminder-settings {padding:20px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
 .reminder-toggle {display:flex;align-items:center;gap:12px;min-height:44px;font-weight:600}
 .page-reminder-settings p {font-size:.85rem;margin:0}
-.page-editor-form>button[type=submit] {position:sticky;bottom:18px;align-self:flex-end;min-width:140px;box-shadow:0 2px 10px #26382c18;z-index:5}
+
 .sheet-scroll {overflow-x:auto;max-width:100%;overscroll-behavior-x:contain}
-.page-sheet table {border-collapse:collapse;width:100%;table-layout:fixed;min-width:360px;font-size:.85rem}
+.page-sheet table {border-collapse:collapse;width:100%;table-layout:fixed;min-width:var(--sheet-width,360px);font-size:.85rem}
 .page-sheet th,.page-sheet td {border:1px solid var(--line);padding:0;min-width:100px}
 .page-sheet th {background:var(--bg);color:var(--muted);font-weight:500;height:30px;text-align:center}
 .page-sheet tr>th:first-child {width:38px}
@@ -60,18 +60,40 @@
 .drawing-canvas {display:block;width:100%;height:auto;background:#fafbf7;border-top:1px solid var(--line);aspect-ratio:5/3}
 .drawing-canvas.editable {touch-action:none;cursor:crosshair;user-select:none}
 .drawing-canvas.erasing {cursor:pointer}
-.page-drawing>small {display:block;padding:8px 12px}
+.page-drawing>small:not(.sr-only) {display:block;padding:8px 12px}
 @keyframes board-block-in {from {opacity:0;transform:translateY(4px)}to {opacity:1;transform:none}}
 @media(max-width:600px) {
   .board-toolbar {gap:10px;flex-wrap:wrap}
   .board-search {min-width:150px}
   .board-editor {padding-top:0}
   .page-editor-heading {align-items:center;margin-bottom:12px;flex-wrap:wrap}
-  .page-editor-heading>span {order:3;text-align:left!important;flex-basis:100%;max-width:none!important;padding-top:0!important;font-size:.8rem}
-  .page-editor-heading>.button {margin-left:auto}
-  .page-editor-heading>span {text-align:right;max-width:130px;padding-top:12px}
   .page-editor-form .form-fields>fieldset {gap:18px}
   .add-block-tools>span {flex-basis:100%}
   .board-page-preview {max-height:280px}
 }
 @media(prefers-reduced-motion:reduce) {.page-block {animation:none}}
+
+.board-editor .editor-action {display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--muted);transition:background-color var(--motion-normal),color var(--motion-normal),scale var(--motion-quick)}
+.board-editor .editor-action:hover {background:var(--green-soft);color:var(--green)}
+.board-editor .editor-action:active {scale:.96}
+.board-editor .editor-action[aria-pressed=true] {background:var(--green-soft);color:var(--green);box-shadow:inset 0 0 0 1px #b5c8ba}
+.board-editor .editor-action.editor-save {background:var(--green);color:white;margin-left:auto}
+.board-editor .editor-save .loading-animation {width:22px;height:22px}
+.page-editor-form> .form-fields>fieldset>.field:first-of-type>label {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.block-controls {padding:2px 12px;background:transparent}
+.text-format-tools,.sheet-tools,.drawing-tools {gap:2px;padding:4px 10px}
+.add-block-tools {border:1px solid var(--line);background:var(--surface);border-radius:12px;align-self:flex-start;padding:4px;gap:4px}
+.pen-width {padding:0 8px;min-height:44px;color:var(--muted)}
+.pen-width select {min-height:40px!important;width:56px;padding:4px!important;font-size:.85rem!important}
+@media(prefers-reduced-motion:reduce) {.board-editor .editor-action:active {scale:1}}
+
+@media(max-width:600px) {
+  .page-sheet table {min-width:var(--sheet-mobile-width,244px);font-size:13px}
+  .page-sheet th,.page-sheet td {min-width:0}
+  .page-sheet th {height:24px;font-size:11px}
+  .page-sheet tr>th:first-child {width:28px}
+  .page-sheet td>input {min-height:34px;font-size:14px;padding:5px 6px!important;line-height:1.3}
+  .page-sheet td>input:focus {font-size:16px}
+  .page-sheet td>span {padding:5px 6px;line-height:1.4;font-variant-numeric:tabular-nums}
+  .page-sheet .sheet-tools {padding:2px 6px;gap:0}
+}
