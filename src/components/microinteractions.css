@@ -1,0 +1,133 @@
+:root {
+  --motion-quick: 110ms;
+  --motion-normal: 180ms;
+  --motion-slow: 280ms;
+  --motion-ease: cubic-bezier(.2,.7,.25,1);
+}
+
+:where(.button,.icon-button,.text-button,.google-button,.date-trigger,.profile-menu-row,
+  .entry-type-switch button,.expense-timing button,.board-filters button,
+  .date-days button,.date-picker-heading button,.date-picker-footer button) {
+  transition: background-color var(--motion-normal), color var(--motion-normal),
+    border-color var(--motion-normal), box-shadow var(--motion-normal),
+    scale var(--motion-quick) var(--motion-ease), translate var(--motion-normal) var(--motion-ease);
+}
+
+:where(.button,.icon-button,.google-button,.date-trigger,.entry-type-switch button,
+  .expense-timing button,.board-filters button,.date-days button,.date-picker-heading button,
+  .date-picker-footer button):not(:disabled):active { scale:.97; }
+.text-button:not(:disabled):active,.profile-menu-row:not(:disabled):active { translate:0 1px; }
+
+:where(.button,.icon-button,.text-button,.google-button,.date-trigger,.tool-link,
+  .profile-menu-row,.board-back,.glass-navigation a)>svg {
+  transition: translate var(--motion-normal) var(--motion-ease), rotate var(--motion-normal) var(--motion-ease);
+}
+
+@media(hover:hover) and (pointer:fine) {
+  :where(.button.primary,.google-button):not(:disabled):hover { translate:0 -1px; }
+  .icon-button:not(:disabled):hover>svg,.date-trigger:not(:disabled):hover>svg { rotate:-6deg; }
+  .button:has(>svg):not(:disabled):hover>svg { translate:1px 0; }
+  .tool-link:hover>svg:last-child,.profile-menu-row:hover>svg:last-child { translate:3px 0; }
+  .board-back:hover>svg { translate:-3px 0; }
+  .glass-navigation a:hover>svg { translate:0 -2px; }
+  :is(.account-card,.goal-card,.board-card):hover { border-color:#bacabe; }
+}
+
+.tool-link {
+  transition: border-color var(--motion-normal), background-color var(--motion-normal),
+    transform var(--motion-normal) var(--motion-ease), scale var(--motion-quick);
+}
+.tool-link:active { scale:.99; }
+.profile-menu-row { transition:background-color var(--motion-normal),color var(--motion-normal),translate var(--motion-quick); }
+.account-card,.goal-card,.board-card { transition:border-color var(--motion-normal),box-shadow var(--motion-normal); }
+:is(.account-card,.goal-card,.board-card):focus-within { border-color:#829c8b; }
+.entry-row,.category-row,.member-row { transition:background-color var(--motion-normal); }
+.entry-row:focus-within { background-color:#f2f6f0; }
+
+:where(input:not([type=hidden]),select,textarea,.amount-control,.date-control) {
+  transition:border-color var(--motion-normal),background-color var(--motion-normal),box-shadow var(--motion-normal);
+}
+:where(input:not([type=checkbox]):not([type=hidden]),select,textarea):focus-visible { border-color:var(--green); }
+.field>label { transition:color var(--motion-normal); }
+.field:focus-within>label { color:var(--green); }
+.field:has([aria-invalid=true])>label { color:#a02b2b; }
+.error-notice { animation:motion-error 220ms var(--motion-ease); }
+.field .error-text { animation:motion-reveal var(--motion-normal) var(--motion-ease); }
+
+.calendar-day { transition:background-color var(--motion-normal),box-shadow var(--motion-normal); }
+.calendar-day .day-number { transition:scale var(--motion-quick),background-color var(--motion-normal),color var(--motion-normal); }
+.calendar-day:active .day-number { scale:.9; }
+.selected-day .day-number { animation:motion-select 180ms var(--motion-ease); }
+.date-days button[aria-pressed=true],.entry-type-switch button[aria-pressed=true],
+.expense-timing button[aria-pressed=true],.board-filters button[aria-pressed=true] {
+  animation:motion-select 180ms var(--motion-ease);
+}
+.board-tasks input:checked { animation:motion-check 200ms var(--motion-ease); }
+.board-tasks label>span { transition:color var(--motion-normal),opacity var(--motion-normal); }
+.board-card-top .status-label { animation:motion-reveal var(--motion-normal) var(--motion-ease); }
+
+.money-tabs { position:relative; isolation:isolate; }
+.money-tabs a { position:relative; z-index:1; transition:color var(--motion-normal),scale var(--motion-quick); }
+.money-tabs a[aria-selected=true] { background:transparent;box-shadow:none; }
+.money-tabs a:active { scale:.97; }
+.money-tab-indicator {
+  position:absolute; z-index:0; pointer-events:none; top:4px; bottom:4px; left:4px;
+  width:calc((100% - 16px) / 3); border-radius:9px; background:var(--surface);
+  box-shadow:0 1px 4px #18352612;
+  transform:translateX(calc(var(--tab-index) * (100% + 4px)));
+  transition:transform var(--motion-slow) var(--motion-ease);
+}
+
+.dialog[open] { animation:motion-dialog 200ms var(--motion-ease); }
+.dialog[open]::backdrop { animation:motion-backdrop 180ms ease-out; }
+.date-popover:popover-open { animation:motion-popover var(--motion-normal) var(--motion-ease); }
+@supports(appearance:base-select) {
+  select::picker(select) { opacity:0; translate:0 -4px; transition:opacity var(--motion-normal),translate var(--motion-normal),display var(--motion-normal) allow-discrete,overlay var(--motion-normal) allow-discrete; }
+  select:open::picker(select) { opacity:1; translate:0 0; }
+  @starting-style { select:open::picker(select) { opacity:0; translate:0 -4px; } }
+}
+
+.save-feedback {
+  display:flex; align-items:center; visibility:hidden; opacity:0; pointer-events:none;
+  translate:0 8px;
+  transition:opacity var(--motion-normal),translate var(--motion-slow) var(--motion-ease),visibility 0s var(--motion-slow);
+}
+.save-feedback.visible { visibility:visible; opacity:1; pointer-events:auto; translate:0 0; transition-delay:0s; }
+.save-feedback.visible [role=status]>svg path { stroke-dasharray:32; stroke-dashoffset:0; animation:motion-checkmark 280ms var(--motion-ease); }
+.success-text { animation:motion-reveal var(--motion-normal) var(--motion-ease); }
+
+.page-heading,.account-grid>.account-card,.goal-grid>.goal-card,.tools-grid>.tool-link,
+.board-grid>.board-card,.entries>.entry-row:nth-child(-n+8),.profile-layout>.panel,
+.landing-intro,.landing-preview { animation:motion-reveal 220ms var(--motion-ease) backwards; }
+:is(.account-grid,.goal-grid,.tools-grid,.board-grid,.profile-layout)>:nth-child(2) { animation-delay:25ms; }
+:is(.account-grid,.goal-grid,.board-grid,.profile-layout)>:nth-child(3) { animation-delay:50ms; }
+:is(.account-grid,.goal-grid,.board-grid)>:nth-child(n+4) { animation-delay:75ms; }
+.entries>.entry-row:nth-child(n+2):nth-child(-n+8) { animation-delay:25ms; }
+.landing-preview { animation-delay:50ms; }
+.bar { transform-origin:bottom; animation:motion-grow-y 420ms var(--motion-ease); transition:height var(--motion-slow) var(--motion-ease); }
+progress::-webkit-progress-value { transform-origin:left; animation:motion-grow-x 420ms var(--motion-ease); transition:width var(--motion-slow) var(--motion-ease); }
+progress::-moz-progress-bar { transform-origin:left; animation:motion-grow-x 420ms var(--motion-ease); }
+
+@keyframes motion-reveal { from { opacity:.65; translate:0 5px; } to { opacity:1; translate:0 0; } }
+@keyframes motion-dialog { from { opacity:0; translate:0 10px; scale:.98; } to { opacity:1; translate:0 0; scale:1; } }
+@keyframes motion-backdrop { from { opacity:0; } to { opacity:1; } }
+@keyframes motion-popover { from { opacity:0; translate:0 -5px; } to { opacity:1; translate:0 0; } }
+@keyframes motion-select { from { scale:.97; } to { scale:1; } }
+@keyframes motion-check { 0% { scale:.85; } 60% { scale:1.08; } 100% { scale:1; } }
+@keyframes motion-checkmark { from { stroke-dashoffset:32; } to { stroke-dashoffset:0; } }
+@keyframes motion-error { 0%,100% { translate:0 0; } 30% { translate:3px 0; } 70% { translate:-2px 0; } }
+@keyframes motion-grow-y { from { scale:1 0; } to { scale:1 1; } }
+@keyframes motion-grow-x { from { scale:0 1; } to { scale:1 1; } }
+
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation:none!important; transition:none!important; }
+  select::picker(select),select::picker-icon,progress::-webkit-progress-value,progress::-moz-progress-bar { animation:none!important;transition:none!important; }
+  :is(.button,.icon-button,.text-button,.google-button,.date-trigger,.profile-menu-row,.tool-link,.board-back,
+    .glass-navigation a,.entry-type-switch button,.expense-timing button,.board-filters button,
+    .date-days button,.date-picker-heading button,.date-picker-footer button):is(:hover,:active),
+  :is(.button,.icon-button,.text-button,.google-button,.date-trigger,.profile-menu-row,.tool-link,.board-back,.glass-navigation a):hover>svg,
+  .calendar-day:active .day-number { scale:1;translate:0 0;rotate:0deg; }
+  .tool-link:hover,.glass-navigation a:active { transform:none; }
+  .tool-link>svg,.profile-menu-row>svg,.board-back>svg,.glass-navigation a>svg { translate:none!important;rotate:none!important; }
+  .save-feedback { translate:0 0; }
+}
