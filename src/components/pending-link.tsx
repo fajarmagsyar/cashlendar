@@ -5,7 +5,10 @@ import type { ComponentProps } from 'react';
 
 function NavigationProgress() {
   const { pending } = useLinkStatus();
-  return pending ? <span className="navigation-progress" role="status"><span className="sr-only">Loading…</span></span> : null;
+  return pending ? <span className="navigation-progress" role="status">
+    <span className="navigation-progress-rail" aria-hidden="true"><span className="navigation-progress-bar"/></span>
+    <span className="navigation-progress-label"><span className="loading-spinner" aria-hidden="true"/>Loading your view…</span>
+  </span> : null;
 }
 
 export default function PendingLink({ children, ...props }: ComponentProps<typeof Link>) {

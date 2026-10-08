@@ -16,7 +16,7 @@ export default async function Calendar({searchParams}:{searchParams:Promise<Reco
   const selected=typeof params.day==='string' && validDate(params.day) && params.day.slice(0,7)===filters.month ? params.day : (filters.month===todayJakarta().slice(0,7) ? todayJakarta() : `${filters.month}-01`);
   const dayPage=Math.max(1,Number.parseInt(String(params.daypage || '1')) || 1);
   const view=filters.view || 'calendar';
-  const [data,plans,entries]=await Promise.all([getFinanceData({...filters,page:view==='list' ? filters.page : 1}),view==='calendar' ? getPlannedExpenses(filters) : Promise.resolve([]),view==='calendar' ? getDayEntries(selected,filters,dayPage) : Promise.resolve([])]);
+  const [data,plans,entries]=await Promise.all([getFinanceData({...filters,page:view==='list' ? filters.page : 1},view==='list'),view==='calendar' ? getPlannedExpenses(filters) : Promise.resolve([]),view==='calendar' ? getDayEntries(selected,filters,dayPage) : Promise.resolve([])]);
   const dayPlans=plans.filter(p=>p.date===selected);
   return <><div className="page-heading"><h1><span className="desktop-view-title">{view==='calendar' ? 'Calendar' : view==='charts' ? 'Charts' : 'Transactions'}</span><span className="mobile-view-title">Money</span></h1><div className="money-heading-actions"><ExportButton filters={filters}/><EntryButton className="button primary finance-add" accounts={data.accounts} categories={data.categories} date={selected}/></div></div>
     {!data.accounts.length && <div className="notice"><Link href="/accounts">Add an account</Link> to start recording transactions.</div>}

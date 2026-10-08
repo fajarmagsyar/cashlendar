@@ -13,5 +13,5 @@ export function ViewTabs({filters,selected}:{filters:EntryFilters;selected:strin
     const tab=ref.current?.querySelectorAll<HTMLAnchorElement>('[role="tab"]')[next];
     tab?.focus();tab?.click();
   }
-  return <div ref={ref} role="tablist" aria-label="Money views" className="money-tabs">{views.map(({view,label},index)=><Link key={view} role="tab" id={`money-tab-${view}`} aria-controls="money-panel" aria-selected={(filters.view || 'calendar')===view} tabIndex={(filters.view || 'calendar')===view ? 0 : -1} href={filterUrl('/',filters,{view,page:1,day:selected})} onKeyDown={event=>navigate(event,index)}>{label}</Link>)}</div>;
+  return <div ref={ref} role="tablist" aria-label="Money views" className="money-tabs">{views.map(({view,label},index)=><Link key={view} prefetch={true} role="tab" id={`money-tab-${view}`} aria-controls="money-panel" aria-selected={(filters.view || 'calendar')===view} tabIndex={(filters.view || 'calendar')===view ? 0 : -1} href={filterUrl('/',filters,{view,page:1,day:selected})} onKeyDown={event=>navigate(event,index)}>{label}</Link>)}</div>;
 }

@@ -7,8 +7,7 @@ import { requireHousehold } from '@/lib/supabase/server';
 import {getProfile} from '@/features/profile/queries';
 export const dynamic='force-dynamic';
 export default async function AppLayout({children}:{children:React.ReactNode}) {
-  const {household}=await requireHousehold();
-  const [accounts,categories,profile]=await Promise.all([getAccounts(),getCategories(),getProfile()]);
+  const [{household},accounts,categories,profile]=await Promise.all([requireHousehold(),getAccounts(),getCategories(),getProfile()]);
   const display=profile.display_name;
   return <div className="app-shell">
     <header className="app-header"><Link href="/" className="brand"><span className="brand-symbol"><Icon name="calendar" size={22}/></span>Cashlendar</Link>

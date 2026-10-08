@@ -1,1 +1,5 @@
-export default function Loading() { return <main id="main" className="loading-page" aria-busy="true"><p className="small-label">CASHLENDAR</p><h1>Getting your days ready…</h1><div className="loading-line"/><p>Loading your household.</p></main>; }
+import { ViewLoading } from '@/components/view-loading';
+
+export default function Loading() {
+  return <main id="main" className="loading-page"><ViewLoading initial/></main>;
+}

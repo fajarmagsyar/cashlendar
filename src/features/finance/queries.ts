@@ -31,11 +31,11 @@ export async function getGoals(): Promise<SavingsGoal[]> {
   if (error) throw new Error(error.message);
   return data.map(g => ({ ...g,target_amount:checkedNumber(g.target_amount) })) as SavingsGoal[];
 }
-export async function getFinanceData(filters: EntryFilters): Promise<FinanceData> {
+export async function getFinanceData(filters: EntryFilters, includeEntries = true): Promise<FinanceData> {
   const { supabase } = await requireHousehold();
   const range = getMonthRange(filters.month);
   const args = { p_start:range.start, p_end_exclusive:range.endExclusive, p_account_id:filters.account || null, p_category_id:filters.category || null, p_kind:filters.kind, p_search:filters.search };
-  const [accounts,categories,entries,summary] = await Promise.all([getAccounts(),getCategories(),supabase.rpc('list_entries',{ ...args,p_limit:50,p_offset:(filters.page-1)*50 }),supabase.rpc('finance_summary',args)]);
+  const [accounts,categories,entries,summary] = await Promise.all([getAccounts(),getCategories(),includeEntries ? supabase.rpc('list_entries',{ ...args,p_limit:50,p_offset:(filters.page-1)*50 }) : Promise.resolve({data:[],error:null}),supabase.rpc('finance_summary',args)]);
   if (entries.error || summary.error) throw new Error(entries.error?.message || summary.error?.message);
   const raw = summary.data;
   return { accounts,categories,entries:(entries.data as Entry[]).map(e => ({ ...e,amount:checkedNumber(e.amount) })), summary:{
