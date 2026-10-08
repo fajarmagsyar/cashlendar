@@ -3,6 +3,9 @@ const config: NextConfig = {
   distDir: process.env.NEXT_BUILD_DIR || '.next',
   poweredByHeader: false,
   devIndicators: false,
+  experimental: {
+    staleTimes: { dynamic:30, static:30 },
+  },
   async headers() {
     return [{ source: '/sw.js', headers: [
       { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },

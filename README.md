@@ -84,6 +84,10 @@ No Redis, custom API service, or service-role key is required. External projects
 
 Reference: [Vercel Next.js deployment](https://vercel.com/docs/frameworks/full-stack/nextjs).
 
+The Supabase project is in Sydney (`ap-southeast-2`). `vercel.json` pins Vercel Functions to Sydney (`syd1`) so server rendering and database queries run in the same region. Redeploy for this setting to take effect. If the database region changes, update this setting too. See [Vercel region configuration](https://vercel.com/docs/regions).
+
+Main-menu screens are fully prefetched in production. Visited pages stay in the browser's router cache for 30 seconds; server actions invalidate affected pages after a save, and returning to the app or reconnecting refreshes the current view. Other household members' changes can take up to this cache interval to appear during navigation. Private pages remain dynamically rendered and are not stored in a shared server cache. Local development disables automatic prefetching; production behavior can be checked with `AUTH_E2E_PRODUCTION=1 pnpm test:e2e:auth tests/e2e/authenticated/prefetch.spec.ts`.
+
 ## Use Cashlendar
 
 - **Calendar:** navigate months, select a day, and add or review its entries.

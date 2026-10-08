@@ -126,3 +126,72 @@ test('applying filters keeps the app mounted and shows immediate feedback',async
   await expect(page.locator('.entry-row')).toContainText('Fixture expense 55');
   expect(documents).toBe(0);
 });
+
+test('returning to a visited menu uses the browser cache without waiting for RSC',async({page})=>{
+  await page.goto('/accounts');
+  const nav=page.getByRole('navigation',{name:'Main navigation'});
+  await nav.getByRole('link',{name:'Savings',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Savings',exact:true})).toBeVisible();
+  await nav.getByRole('link',{name:'Accounts',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Accounts',exact:true})).toBeVisible();
+  let requests=0;
+  let release!:()=>void;
+  const held=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**/*',async route=>{
+    if(route.request().headers()['rsc']==='1') {requests++;await held;}
+    await route.continue();
+  });
+  try {
+    await nav.getByRole('link',{name:'Savings',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'Savings',exact:true})).toBeVisible({timeout:700});
+    expect(requests).toBe(0);
+  } finally {release();}
+});
+
+test('the navbar indicator moves before a slow screen finishes loading',async({page})=>{
+  await page.goto('/accounts');
+  const nav=page.getByRole('navigation',{name:'Main navigation'});
+  let release!:()=>void;
+  const held=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**/*',async route=>{
+    if(route.request().headers()['rsc']==='1') await held;
+    await route.continue();
+  });
+  try {
+    await nav.getByRole('link',{name:'Savings',exact:true}).click();
+    const indicator=nav.locator('.navigation-indicator');
+    await expect(indicator).toBeVisible({timeout:700});
+    const savings=nav.getByRole('link',{name:'Savings',exact:true});
+    await expect(async()=>{
+      const marker=await indicator.boundingBox(),tab=await savings.boundingBox();
+      expect(marker).not.toBeNull();expect(tab).not.toBeNull();
+      expect(Math.abs(marker!.x-tab!.x)).toBeLessThan(2);
+      expect(Math.abs(marker!.width-tab!.width)).toBeLessThan(2);
+    }).toPass({timeout:1000});
+    await expect(page.getByRole('heading',{name:'Accounts',exact:true})).toBeVisible();
+  } finally {release();}
+  await expect(page.getByRole('heading',{name:'Savings',exact:true})).toBeVisible();
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(nav.locator('.navigation-indicator')).toHaveCSS('transition-duration','0s');
+});
+
+test('saving an account invalidates a previously cached Savings screen',async({page})=>{
+  await page.goto('/savings');
+  const nav=page.getByRole('navigation',{name:'Main navigation'});
+  await nav.getByRole('link',{name:'Accounts',exact:true}).click();
+  await page.getByRole('button',{name:'Add account',exact:true}).click();
+  let dialog=page.getByRole('dialog',{name:'Add account'});
+  await dialog.getByLabel('Account name').fill('Cached savings account');
+  await dialog.getByLabel('Account type').selectOption('savings');
+  await dialog.getByRole('button',{name:'Save account',exact:true}).click();
+  await expect(dialog).toHaveCount(0);
+  await nav.getByRole('link',{name:'Savings',exact:true}).click();
+  await page.getByRole('button',{name:'Create savings goal',exact:true}).click();
+  dialog=page.getByRole('dialog');
+  await dialog.getByLabel('Savings account').selectOption({label:'Cached savings account'});
+  await dialog.getByLabel('Goal name').fill('Fresh cached goal');
+  await dialog.getByLabel('Target amount (IDR)').fill('10000');
+  await dialog.getByRole('button',{name:'Save goal',exact:true}).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole('heading',{name:'Fresh cached goal',exact:true})).toBeVisible();
+});

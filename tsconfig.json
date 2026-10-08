@@ -38,7 +38,9 @@
     ".next-auth/types/**/*.ts",
     ".next-auth/dev/types/**/*.ts",
     ".next-baseline/types/**/*.ts",
-    ".next-baseline/dev/types/**/*.ts"
+    ".next-baseline/dev/types/**/*.ts",
+    ".next-auth-production/types/**/*.ts",
+    ".next-auth-production/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
