@@ -25,10 +25,10 @@ export function FamilyBoard({items,authors,pushReady}:{items:BoardItem[];authors
   const visible=items.filter(item=>!search || `${item.title} ${itemDocument(item).blocks.map(block=>block.type==='text' ? block.text : block.type==='checklist' ? block.tasks.map(task=>task.text).join(' ') : block.type==='table' ? block.cells.flat().join(' ') : '').join(' ')}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
   return <>
     <Link href="/more" className="board-back"><Icon name="left"/>{t('More')}</Link>
-    <div className="page-heading"><h1>{t('Family board')}</h1><Link className="button primary" href="/board/new"><Icon name="plus"/>{t('New page')}</Link></div>
+    <div className="page-heading"><h1>{t('Family board')}</h1><div className="board-heading-actions"><button className="button secondary board-icon-action" title={t('Refresh board')} aria-label={t('Refresh board')} aria-busy={refreshing} disabled={refreshing} onClick={()=>startRefresh(()=>router.refresh())}><Icon name="reload"/></button><Link className="button primary board-icon-action" href="/board/new" title={t('New page')} aria-label={t('New page')}><Icon name="plus"/></Link></div></div>
     <p className="muted">{t('One place for the things your family needs to remember.')}</p>
     <PhoneNotifications configured={pushReady}/>
-    <div className="board-toolbar"><label className="board-search"><span className="sr-only">{t('Search pages')}</span><input type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder={t('Search pages')}/></label><button className="button secondary" disabled={refreshing} onClick={()=>startRefresh(()=>router.refresh())}>{t(refreshing ? 'Loading…' : 'Refresh board')}</button></div>
+    <div className="board-toolbar"><label className="board-search"><span className="sr-only">{t('Search pages')}</span><input type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder={t('Search pages')}/></label></div>
     {visible.length ? <section className="board-grid" aria-label={t('Shared board items')}>{visible.map(item=><BoardCard key={item.id} item={item} author={authors[item.updated_by] || t('Former member')}/>)}</section>
       : <section className="panel empty-state"><Icon name="board" size={32}/><h2>{t(items.length ? 'Nothing here yet' : 'Start with something to share')}</h2><p>{t('A shopping list, a school note, or a reminder for everyone.')}</p><Link className="button primary" href="/board/new">{t('New page')}</Link></section>}
   </>;

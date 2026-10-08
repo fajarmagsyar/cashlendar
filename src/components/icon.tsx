@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react';
-export type IconName = 'text'|'checklist'|'table'|'pen'|'heading'|'bold'|'italic'|'up'|'down'|'trash'|'undo'|'eraser'|'row-add'|'column-add'|'row-remove'|'column-remove'|'info'|'save'|'tools'|'board'|'bell'|'calendar'|'chart'|'list'|'wallet'|'savings'|'family'|'plus'|'left'|'right'|'close'|'logout'|'arrow'|'check'|'download'|'profile'|'settings';
+export type IconName = 'reload'|'chip'|'text'|'checklist'|'table'|'pen'|'heading'|'bold'|'italic'|'up'|'down'|'trash'|'undo'|'eraser'|'row-add'|'column-add'|'row-remove'|'column-remove'|'info'|'save'|'tools'|'board'|'bell'|'calendar'|'chart'|'list'|'wallet'|'savings'|'family'|'plus'|'left'|'right'|'close'|'logout'|'arrow'|'check'|'download'|'profile'|'settings';
 const paths: Record<IconName,string> = {
+  reload:'M20 7v5h-5M20 12a8 8 0 1 0-2 5M20 7l-2-2',
+  chip:'M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM9 4v16M15 4v16M3 9h6M15 9h6M3 15h6M15 15h6M9 12h6',
   text:'M4 5h16M12 5v15M8 20h8',
   checklist:'M4 4h5v5H4zM13 6h7M4 14l2 2 4-4M13 15h7M13 20h7',
   table:'M3 4h18v16H3zM3 9h18M3 14h18M9 4v16M15 4v16',
