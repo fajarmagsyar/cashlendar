@@ -2,11 +2,12 @@
 
 import Link, { useLinkStatus } from 'next/link';
 import type { ComponentProps } from 'react';
+import { LoadingAnimation } from './loading-animation';
 
 export function NavigationProgress({pending}:{pending:boolean}) {
   return pending ? <span className="navigation-progress" role="status">
-    <span className="navigation-progress-rail" aria-hidden="true"><span className="navigation-progress-bar"/></span>
-    <span className="navigation-progress-label"><span className="loading-spinner" aria-hidden="true"/>Loading your view…</span>
+    <LoadingAnimation/>
+    <span className="sr-only">Loading</span>
   </span> : null;
 }
 

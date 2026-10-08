@@ -45,7 +45,7 @@ test('a forged identity is rejected before household data is loaded',async({page
   expect(counts['/rest/v1/household_members'] || 0).toBe(0);
 });
 
-test('slow initial data shows the household skeleton without overflow',async({page,request})=>{
+test('slow initial data shows the loading animation without overflow',async({page,request})=>{
   await request.post('http://127.0.0.1:54329/test/delay?ms=800');
   try {
     await page.goto('/?month=2026-01',{waitUntil:'commit'});
@@ -84,8 +84,8 @@ test('changing the selected day gives feedback before server data arrives',async
   try {
     await page.getByRole('link',{name:/Wednesday, January 7/}).click();
     await expect(page.getByRole('status').filter({hasText:'Loading'})).toBeVisible({timeout:1000});
-    await expect(page.locator('.loading-spinner')).toHaveCSS('animation-name','none');
-    await expect(page.locator('.navigation-progress-bar')).toHaveCSS('animation-name','none');
+    await expect(page.locator('.loading-animation-fallback')).toHaveCSS('animation-name','none');
+    await expect(page.locator('.loading-animation-player svg')).toBeVisible();
     await page.screenshot({path:`test-results/navigation-loading-${test.info().project.name}.png`});
   } finally {release();}
   await expect(page.getByRole('link',{name:/Wednesday, January 7/})).toHaveAttribute('aria-current','date');
@@ -151,6 +151,7 @@ test('returning to a visited menu uses the browser cache without waiting for RSC
 test('the navbar indicator moves before a slow screen finishes loading',async({page})=>{
   await page.goto('/accounts');
   const nav=page.getByRole('navigation',{name:'Main navigation'});
+  await expect(nav.getByRole('link')).toHaveText(['Money','Accounts','Savings','Profile']);
   let release!:()=>void;
   const held=new Promise<void>(resolve=>{release=resolve;});
   await page.route('**/*',async route=>{
