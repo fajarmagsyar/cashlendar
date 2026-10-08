@@ -1,4 +1,6 @@
 'use client';
+import {useI18n} from '@/components/language-provider';
+
 import { useEffect,useState,useSyncExternalStore } from 'react';
 import { Icon } from './icon';
 import { Dialog } from './dialog';
@@ -12,6 +14,7 @@ export function PwaRegistration() {
   return null;
 }
 export function InstallGuidance() {
+  const {t}=useI18n();
   const ios = useSyncExternalStore(subscribe,isIos,()=>false);
   const [prompt,setPrompt] = useState<InstallEvent|null>(null),[dismissed,setDismissed] = useState(false),[instructions,setInstructions] = useState(false);
   useEffect(()=>{
@@ -21,8 +24,8 @@ export function InstallGuidance() {
     return ()=>{window.removeEventListener('beforeinstallprompt',handle);window.removeEventListener('appinstalled',installed);};
   },[]);
   if (dismissed || (!ios && !prompt)) return null;
-  return <><button type="button" className="icon-button install-button" aria-label="Install Cashlendar" title="Install Cashlendar" onClick={async()=>{
+  return <><button type="button" className="icon-button install-button" aria-label={t("Install Cashlendar")} title={t("Install Cashlendar")} onClick={async()=>{
     if(prompt){try{await prompt.prompt();const choice=await prompt.userChoice;if(choice.outcome==='accepted') setDismissed(true);setPrompt(null);}catch{setInstructions(true);}}
     else setInstructions(true);
-  }}><Icon name="download" size={20}/></button>{instructions && <Dialog title="Install Cashlendar" onClose={()=>setInstructions(false)}><p>In Safari, tap Share, then Add to Home Screen.</p></Dialog>}</>;
+  }}><Icon name="download" size={20}/></button>{instructions && <Dialog title={t("Install Cashlendar")} onClose={()=>setInstructions(false)}><p>{t("In Safari, tap Share, then Add to Home Screen.")}</p></Dialog>}</>;
 }

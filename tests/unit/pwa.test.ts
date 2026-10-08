@@ -25,3 +25,22 @@ test('worker caches public assets only and returns an offline document on failed
   handlers.fetch({ request:{method:'GET',url:'https://app.test/',mode:'navigate'},respondWith:p=>{response=p;} });
   assert.equal(await response,offline);
 });
+
+test('push displays a reminder and notification taps open the same-origin board',async()=>{
+  type WorkerEvent={data?:{json:()=>unknown};notification?:{close:()=>void};waitUntil:(promise:Promise<unknown>)=>void};
+  const handlers:Record<string,(event:WorkerEvent)=>void>={};
+  const shown:{title:string;options:{body:string;data:{url:string}}}[]=[];
+  const opened:string[]=[];let focused=false,closed=false;
+  const windows:{url:string;navigate:(url:string)=>Promise<void>;focus:()=>Promise<void>}[]=[{url:'https://app.test/accounts',navigate:async url=>{opened.push(url);},focus:async()=>{focused=true;}}];
+  const self={location:{origin:'https://app.test'},addEventListener:(name:string,handler:(event:WorkerEvent)=>void)=>{handlers[name]=handler;},registration:{showNotification:async(title:string,options:typeof shown[number]['options'])=>{shown.push({title,options});}},clients:{matchAll:async()=>windows,openWindow:async(url:string)=>{opened.push(url);}}};
+  vm.runInNewContext(await readFile('public/sw.js','utf8'),{self,URL});
+  let pending:Promise<unknown>=Promise.resolve();
+  const waitUntil=(promise:Promise<unknown>)=>{pending=promise;};
+  handlers.push({data:{json:()=>({body:'A family reminder is due.',url:'https://outside.test'})},waitUntil});await pending;
+  assert.equal(shown[0].title,'Cashlendar');assert.equal(shown[0].options.data.url,'/board');
+  handlers.notificationclick({notification:{close:()=>{closed=true;}},waitUntil});await pending;
+  assert.equal(closed,true);assert.equal(focused,true);assert.deepEqual(opened,['/board']);
+  windows.length=0;handlers.notificationclick({notification:{close:()=>{}},waitUntil});await pending;
+  assert.deepEqual(opened,['/board','/board']);
+  handlers.push({data:{json:()=>{throw new Error('bad payload');}},waitUntil});assert.equal(shown.length,1);
+});

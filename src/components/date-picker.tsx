@@ -1,4 +1,5 @@
 'use client';
+import {useI18n} from '@/components/language-provider';
 
 import { useId, useRef, useState, type InputHTMLAttributes, type KeyboardEvent } from 'react';
 import { todayJakarta, validDate } from '@/lib/finance/dates';
@@ -12,11 +13,12 @@ type DatePickerProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'val
   onChange?: (value: string) => void;
 };
 
-const dateLabel = (date: string) => new Intl.DateTimeFormat('en', {
+const dateLabel = (date: string,locale:string) => new Intl.DateTimeFormat(locale, {
   month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC',
 }).format(new Date(`${date}T00:00:00Z`));
 
 export function DatePicker({ value, defaultValue = '', onChange, min = '1900-01-01', max = '9999-12-31', ...props }: DatePickerProps) {
+  const {t,locale}=useI18n();
   const generatedId = useId();
   const id = props.id || generatedId;
   const today = todayJakarta();
@@ -31,7 +33,7 @@ export function DatePicker({ value, defaultValue = '', onChange, min = '1900-01-
   const [year, monthNumber] = month.split('-').map(Number);
   const leadingDays = (new Date(Date.UTC(year, monthNumber - 1, 1)).getUTCDay() + 6) % 7;
   const daysInMonth = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
-  const monthTitle = new Intl.DateTimeFormat('en', {
+  const monthTitle = new Intl.DateTimeFormat(locale, {
     month: 'long', year: 'numeric', timeZone: 'UTC',
   }).format(new Date(`${month}-01T00:00:00Z`));
 
@@ -100,35 +102,35 @@ export function DatePicker({ value, defaultValue = '', onChange, min = '1900-01-
     <div className="date-control">
       <input {...props} ref={input} id={id} type="date" min={min} max={max} value={selected}
         onChange={event => { setInternalValue(event.target.value); onChange?.(event.target.value); }} />
-      <button ref={trigger} type="button" className="date-trigger" aria-label="Open date picker"
+      <button ref={trigger} type="button" className="date-trigger" aria-label={t("Open date picker")}
         aria-expanded={open} aria-controls={`${id}-picker`} aria-haspopup="dialog" disabled={props.disabled} onClick={toggle}>
         <Icon name="calendar" size={19} />
       </button>
-      <div ref={panel} id={`${id}-picker`} popover="auto" role="dialog" aria-label="Choose date" className="date-popover"
+      <div ref={panel} id={`${id}-picker`} popover="auto" role="dialog" aria-label={t("Choose date")} className="date-popover"
         onToggle={event => {
           setOpen(event.newState === 'open');
           if (event.newState === 'closed' && panel.current?.contains(document.activeElement)) trigger.current?.focus();
         }}>
         <div className="date-picker-heading">
-          <button type="button" aria-label="Previous month" disabled={month <= min.slice(0, 7)} onClick={() => navigateMonth(-1)}><Icon name="left" size={16} /></button>
+          <button type="button" aria-label={t("Previous month")} disabled={month <= min.slice(0, 7)} onClick={() => navigateMonth(-1)}><Icon name="left" size={16} /></button>
           <h3 aria-live="polite">{monthTitle}</h3>
-          <button type="button" aria-label="Next month" disabled={month >= max.slice(0, 7)} onClick={() => navigateMonth(1)}><Icon name="right" size={16} /></button>
+          <button type="button" aria-label={t("Next month")} disabled={month >= max.slice(0, 7)} onClick={() => navigateMonth(1)}><Icon name="right" size={16} /></button>
         </div>
-        <div className="date-weekdays" aria-hidden="true">{['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(day => <span key={day}>{day}</span>)}</div>
-        <div className="date-days" role="group" aria-label="Calendar days">
+        <div className="date-weekdays" aria-hidden="true">{[t("Mo"), t("Tu"), t("We"), t("Th"), t("Fr"), t("Sa"), t("Su")].map(day => <span key={day}>{t(day)}</span>)}</div>
+        <div className="date-days" role="group" aria-label={t("Calendar days")}>
           {Array.from({ length: leadingDays }, (_, index) => <span key={`blank-${index}`} />)}
           {Array.from({ length: daysInMonth }, (_, index) => {
             const date = `${month}-${String(index + 1).padStart(2, '0')}`;
-            return <button key={date} type="button" data-date={date} aria-label={dateLabel(date)}
+            return <button key={date} type="button" data-date={date} aria-label={dateLabel(date,locale)}
               aria-pressed={date === selected} aria-current={date === today ? 'date' : undefined}
               tabIndex={date === focusedDate ? 0 : -1} disabled={date < min || date > max}
               onKeyDown={event => handleDayKey(event, date)} onClick={() => changeDate(date)}>{index + 1}</button>;
           })}
         </div>
         <div className="date-picker-footer">
-          <button type="button" disabled={today < min || today > max} onClick={() => changeDate(today)}>Today</button>
-          {!props.required && <button type="button" onClick={() => changeDate('')}>Clear date</button>}
-          <button type="button" onClick={() => { panel.current?.hidePopover(); trigger.current?.focus(); }}>Done</button>
+          <button type="button" disabled={today < min || today > max} onClick={() => changeDate(today)}>{t("Today")}</button>
+          {!props.required && <button type="button" onClick={() => changeDate('')}>{t("Clear date")}</button>}
+          <button type="button" onClick={() => { panel.current?.hidePopover(); trigger.current?.focus(); }}>{t("Done")}</button>
         </div>
       </div>
     </div>

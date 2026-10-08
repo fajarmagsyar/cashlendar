@@ -2,7 +2,7 @@ import { test,expect } from '@playwright/test';
 test.beforeEach(async({context,request})=>{
   await request.post('http://127.0.0.1:54329/test/reset');
   const {cookieName,cookieValue}=await (await request.get('http://127.0.0.1:54329/test/session')).json();
-  await context.addCookies([{name:cookieName,value:cookieValue,domain:'localhost',path:'/',httpOnly:false,sameSite:'Lax'}]);
+  await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{name:cookieName,value:cookieValue,domain:'localhost',path:'/',httpOnly:false,sameSite:'Lax'}]);
 });
 test('three views show complete totals and support keyboard entry editing and deletion',async({page})=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
@@ -35,6 +35,7 @@ test('three views show complete totals and support keyboard entry editing and de
 test('supporting screens render on phone and desktop, and dialogs restore keyboard focus',async({page})=>{
   for(const route of ['/accounts','/savings','/family','/profile','/settings','/?month=2026-01','/charts?month=2026-01','/list?month=2026-01']){
     await page.goto(route);
+    await expect(page.locator('.page-heading')).toBeVisible();
     for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);}
     await page.setViewportSize({width:test.info().project.name==='mobile' ? 390 : 1440,height:900});
     await page.screenshot({path:`test-results/${route.split('?')[0].replaceAll('/','') || 'calendar'}-${test.info().project.name}.png`});
@@ -50,6 +51,7 @@ test('savings contributions transfer funds without changing monthly expenses',as
   await dialog.getByLabel('Amount (IDR)').fill('50000');await dialog.getByLabel('Date',{exact:true}).fill('2026-01-05');
   await dialog.getByLabel('From account').selectOption({label:'Daily cash'});await dialog.getByRole('button',{name:'Save transfer'}).click();
   await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole('status').filter({hasText:'Transfer saved.'})).toBeVisible();
   await page.goto('/charts?month=2026-01');await expect(page.getByLabel('Monthly totals')).toContainText('55.000');
 });
 test('switching Google accounts preserves the invitation destination',async({page})=>{
@@ -60,14 +62,14 @@ test('switching Google accounts preserves the invitation destination',async({pag
 });
 test('sign-out and browser history do not expose the previous household',async({page})=>{
   await page.goto('/accounts');await expect(page.getByRole('heading',{name:'Accounts',exact:true})).toBeVisible();
-  await page.getByRole('link',{name:'Open profile',exact:true}).click();
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Profile',exact:true}).click();
   await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page).toHaveURL(/\/login/);
   await page.goBack();await expect(page).toHaveURL(/\/login/);
   await expect(page.getByRole('heading',{name:'Accounts',exact:true})).toHaveCount(0);
 });
 test('members cannot see owner-only invitation or membership controls',async({page,context,request})=>{
   const {cookieName,cookieValue}=await (await request.get('http://127.0.0.1:54329/test/session?member=1')).json();
-  await context.clearCookies();await context.addCookies([{name:cookieName,value:cookieValue,domain:'localhost',path:'/',httpOnly:false,sameSite:'Lax'}]);
+  await context.clearCookies();await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{name:cookieName,value:cookieValue,domain:'localhost',path:'/',httpOnly:false,sameSite:'Lax'}]);
   await page.goto('/family');await expect(page.getByRole('heading',{name:'Browser Test Family'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Invite family'})).toHaveCount(0);await expect(page.getByRole('button',{name:'Remove',exact:true})).toHaveCount(0);
 });

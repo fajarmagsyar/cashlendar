@@ -24,11 +24,11 @@ export function shiftMonth(month: string, offset: number): string {
   date.setUTCMonth(date.getUTCMonth() + offset);
   return date.toISOString().slice(0, 7);
 }
-export function monthLabel(month: string): string {
-  return new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${getMonthRange(month).start}T00:00:00Z`));
+export function monthLabel(month: string,locale:string='en'): string {
+  return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${getMonthRange(month).start}T00:00:00Z`));
 }
-export function dayLabel(date: string): string {
-  return new Intl.DateTimeFormat('en', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+export function dayLabel(date: string,locale:string='en'): string {
+  return new Intl.DateTimeFormat(locale, { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
 }
 export function calendarDays(month: string) {
   const { start, endExclusive } = getMonthRange(month);

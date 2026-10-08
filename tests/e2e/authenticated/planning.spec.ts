@@ -6,7 +6,7 @@ async function openPlan(page:Page) {
 test.beforeEach(async({context,request})=>{
   await request.post('http://127.0.0.1:54329/test/reset');
   const {cookieName,cookieValue}=await (await request.get('http://127.0.0.1:54329/test/session')).json();
-  await context.addCookies([{name:cookieName,value:cookieValue,domain:'localhost',path:'/',httpOnly:false,sameSite:'Lax'}]);
+  await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{name:cookieName,value:cookieValue,domain:'localhost',path:'/',httpOnly:false,sameSite:'Lax'}]);
 });
 
 test('future plans appear on the calendar, move when edited, and become expenses only when paid',async({page})=>{
@@ -25,6 +25,7 @@ test('future plans appear on the calendar, move when edited, and become expenses
   await page.screenshot({path:`test-results/entry-sheet-${test.info().project.name}.png`});
   await dialog.getByRole('button',{name:'Save plan'}).click();
   await expect(dialog).toHaveCount(0);
+  await expect(page.getByRole('status').filter({hasText:'Planned expense saved.'})).toBeVisible();
   await expect(page.getByRole('link',{name:/Monday, January 21.*1 planned expense/})).toBeVisible();
   await expect(page.getByLabel('Monthly totals')).toContainText('Rp');
   await expect(page.getByLabel('Monthly totals')).not.toContainText('150.000');
@@ -34,6 +35,7 @@ test('future plans appear on the calendar, move when edited, and become expenses
   await row.getByRole('button',{name:'Edit',exact:true}).click();
   await page.getByLabel('Amount (IDR)').fill('200000');await page.getByLabel('Date',{exact:true}).fill('2030-01-22');
   await page.getByRole('button',{name:'Save changes'}).click();await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('status').filter({hasText:'Planned expense updated.'})).toBeVisible();
   await expect(page.getByText('Planned school supplies',{exact:true})).toHaveCount(0);
   await page.getByRole('link',{name:/Tuesday, January 22.*1 planned expense/}).click();
   row=page.locator('.planned-row').filter({hasText:'Planned school supplies'});await expect(row).toContainText('200.000');
@@ -73,7 +75,7 @@ test('all navigation destinations remain accessible in the floating phone dock',
   await page.setViewportSize({width:320,height:700});await page.goto('/');
   const nav=page.getByRole('navigation',{name:'Main navigation'});await expect(nav.getByRole('link')).toHaveCount(4);
   await expect(nav.getByRole('button',{name:'Add transaction'})).toBeInViewport();
-  for(const label of ['Money','Accounts','Savings','Profile']){
+  for(const label of ['Money','Accounts','More','Profile']){
     const link=nav.getByRole('link',{name:label,exact:true});await expect(link).toBeInViewport();
     const box=await link.boundingBox();expect(box!.width).toBeGreaterThanOrEqual(44);expect(box!.height).toBeGreaterThanOrEqual(44);
     await link.click();await expect(link).toHaveAttribute('aria-current','page');

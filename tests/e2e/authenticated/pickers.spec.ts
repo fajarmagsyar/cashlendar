@@ -4,7 +4,7 @@ const fixtureUrl = process.env.PICKER_FIXTURE_URL || 'http://127.0.0.1:54329';
 test.beforeEach(async ({ context, request }) => {
   await request.post(`${fixtureUrl}/test/reset`);
   const { cookieName, cookieValue } = await (await request.get(`${fixtureUrl}/test/session`)).json();
-  await context.addCookies([{ name: cookieName, value: cookieValue, domain: 'localhost', path: '/', sameSite: 'Lax' }]);
+  await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{ name: cookieName, value: cookieValue, domain: 'localhost', path: '/', sameSite: 'Lax' }]);
 });
 
 test('select menus use the app theme and retain filtering and keyboard selection', async ({ page }) => {

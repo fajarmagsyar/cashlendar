@@ -1,9 +1,10 @@
 import { test,expect } from '@playwright/test';
+test.beforeEach(async({context})=>{await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'}]);});
 test('unconfigured app presents honest setup and contains the layout', async ({page})=>{
   const errors:string[] = [];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');
   await expect(page).toHaveURL(/\/login/);
-  await expect(page.getByRole('heading',{name:/fresh start/})).toBeVisible();
+  await expect(page.getByRole('heading',{name:/Today’s spending/})).toBeVisible();
   await expect(page.getByText('Connect Supabase to get started')).toBeVisible();
   await expect(page.getByText('Continue with Google',{exact:true})).toHaveCount(0);
   for(const width of [320,390,768,1440]){

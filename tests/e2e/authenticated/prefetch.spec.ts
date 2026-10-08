@@ -4,15 +4,11 @@ test('the main menu prefetches a complete screen before clicking',async({page,co
   test.skip(process.env.AUTH_E2E_PRODUCTION!=='1','Automatic prefetching runs in production.');
   await request.post('http://127.0.0.1:54329/test/reset');
   const {cookieName,cookieValue}=await (await request.get('http://127.0.0.1:54329/test/session')).json();
-  await context.addCookies([{name:cookieName,value:cookieValue,domain:'localhost',path:'/',sameSite:'Lax'}]);
-  const prefetched=(path:string,content:string)=>page.waitForResponse(async response=>{
-    if(new URL(response.url()).pathname!==path || response.request().headers()['rsc']!=='1') return false;
-    try {
-      if(await response.finished()) return false;
-      return (await response.text()).includes(content);
-    } catch {return false;}
+  await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{name:cookieName,value:cookieValue,domain:'localhost',path:'/',sameSite:'Lax'}]);
+  const accounts=page.waitForResponse(response=>{
+    const headers=response.request().headers();
+    return new URL(response.url()).pathname==='/accounts' && headers.rsc==='1' && !headers['next-router-segment-prefetch'] && response.status()===200;
   });
-  const accounts=prefetched('/accounts','Daily cash');
   await page.goto('/profile');
   await expect(page.getByRole('heading',{name:'Profile',exact:true})).toBeVisible();
   await accounts;

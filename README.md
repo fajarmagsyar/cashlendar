@@ -1,16 +1,18 @@
 # Cashlendar
 
-A shared-household money manager with Calendar, List, and Charts tabs, Google login, IDR accounts, transfers, savings goals, Excel export, and home-screen installation.
+A shared-household money manager with Calendar, List, and Charts tabs, Google login, IDR accounts, transfers, savings goals, Excel export, a shared family board, phone reminders, and home-screen installation.
 
 ## Update an existing installation
 
-Apply `supabase/migrations/202610060003_finance_export.sql` in your Supabase SQL Editor, then deploy the updated app to Vercel. If the planned-expense migration `202610060002_planned_expenses.sql` has not been applied yet, apply it first. Run each migration once, in filename order. Both preserve existing accounts and transactions. If you manage migration history through the Supabase CLI, use `supabase db push` instead.
+Apply the new `202610080001_family_board.sql` and `202610080002_board_notifications.sql` migrations in your Supabase SQL Editor, then deploy the updated app to Vercel. Apply `202610060003_finance_export.sql` first if it is still pending. If the planned-expense migration `202610060002_planned_expenses.sql` has not been applied yet, apply it first. Run each migration once, in filename order. These preserve existing accounts and transactions. If you manage migration history through the Supabase CLI, use `supabase db push` instead.
 
-On mobile, Money contains Calendar, List, and Charts tabs with a shared month and filters. The dock shows Money, Accounts, +, Savings, and Profile. The central + in the dock opens Add transaction from any signed-in screen. Transactions show the original signed-in recorder; editing an entry preserves that attribution. Export Excel downloads all entries matching the current month and filters, including pages beyond the visible list. Planned expenses appear on a separate sheet. Amounts remain numeric for calculations; amounts requiring more than Excel's 15 significant digits are exported as exact text.
+On mobile, Money contains Calendar, List, and Charts tabs with a shared month and filters. The dock shows Money, Accounts, +, More, and Profile. The central + in the dock opens Add transaction from any signed-in screen. Transactions show the original signed-in recorder; editing an entry preserves that attribution. Export Excel downloads all entries matching the current month and filters, including pages beyond the visible list. Planned expenses appear on a separate sheet. Amounts remain numeric for calculations; amounts requiring more than Excel's 15 significant digits are exported as exact text.
 
-Profile lets you edit your Cashlendar display name, open Family and Settings, manage credentials through your Google account, switch Google accounts on this device, and sign out. Language and currency are marked Soon in Settings; the app currently uses English and IDR. Profile editing uses the existing self-only database policy and requires no additional migration.
+Profile lets you edit your Cashlendar display name, open Family and Settings, manage credentials through your Google account, switch Google accounts on this device, and sign out. Settings lets you choose Bahasa Indonesia or English; Indonesian is the default. Currency remains IDR. Profile editing uses the existing self-only database policy and requires no additional migration.
 
 In Add transaction, choose Expense → Planned and set the spending date. Selecting a future day in the calendar starts a planned expense automatically. Plans appear on the calendar but do not affect balances or charts. Mark paid records an expense on the payment date and removes the plan atomically. Plans can also be edited or deleted. Amount fields add IDR thousand separators as you type, such as `1.250.000`.
+
+More opens Savings and the Family board. Household members can create and edit shared notes, tick tasks, and manage reminders. Changes refresh while the board is open (every 30 seconds, paused during editing), on returning to the app, or through Refresh board. Updates check the record version to prevent overwriting someone else’s changes. Phone notifications are opt-in for each device and need the setup in [docs/phone-reminders.md](docs/phone-reminders.md).
 
 ## Run locally
 
@@ -137,3 +139,9 @@ See `docs/verification.md` for the actual checks run and remaining integration r
 - `tests`: domain/database and browser tests.
 
 Approved design and implementation plan are under `docs/superpowers/`.
+
+## Languages and public landing page
+
+New visitors see Bahasa Indonesia. The language selector on the public `/login` page and Profile → Settings offers English and Bahasa Indonesia. The choice is remembered for one year in the browser cookie `cashlendar-language`; server-rendered pages and client forms use the same preference. UI labels, dates, accessibility text, common validation messages, and save confirmations are translated. Names, notes, and category labels entered by users retain their original text. Currency remains IDR and the financial calendar remains in Asia/Jakarta.
+
+Translations live in `src/lib/i18n/id.json`, with English source text as keys. The landing page in `src/features/household/landing.tsx` shows labeled example calendar and savings data. It retains the configured Google sign-in flow and any invitation destination.

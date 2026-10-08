@@ -3,7 +3,7 @@ import ExcelJS from 'exceljs';
 test.beforeEach(async({context,request})=>{
   await request.post('http://127.0.0.1:54329/test/reset');
   const {cookieName,cookieValue}=await (await request.get('http://127.0.0.1:54329/test/session')).json();
-  await context.addCookies([{name:cookieName,value:cookieValue,domain:'localhost',path:'/',sameSite:'Lax'}]);
+  await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{name:cookieName,value:cookieValue,domain:'localhost',path:'/',sameSite:'Lax'}]);
 });
 test('mobile Money tabs retain filters and the dock adds from any screen',async({page})=>{
   await page.setViewportSize({width:320,height:700});
@@ -23,7 +23,7 @@ test('mobile Money tabs retain filters and the dock adds from any screen',async(
   await expect(nav.getByRole('link')).toHaveCount(4);
   const add=nav.getByRole('button',{name:'Add transaction'});
   const box=await add.boundingBox();expect(box!.width).toBeGreaterThanOrEqual(44);expect(box!.height).toBeGreaterThanOrEqual(44);
-  for(const name of ['Accounts','Savings','Profile']) {
+  for(const name of ['Accounts','More','Profile']) {
     await nav.getByRole('link',{name,exact:true}).click();await add.click();
     await expect(page.getByRole('dialog')).toHaveAccessibleName('Add transaction');
     await page.keyboard.press('Escape');await expect(add).toBeFocused();

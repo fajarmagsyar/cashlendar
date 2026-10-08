@@ -55,9 +55,9 @@ function identity(value:string|undefined){
     return payload.exp>Math.floor(Date.now()/1000) ? users[payload.sub] || null : null;
   } catch {return null;}
 }
-const tables=new Set(['profiles','households','household_members','invitations','accounts','categories','transactions','transfers','savings_goals','planned_expenses']);
-const rpcs=new Set(['create_household','create_invitation','accept_invitation','remove_member','revoke_invitation','account_balances','list_entries','finance_summary','list_planned_expenses','pay_planned_expense','export_finances']);
-const identifier=(value:string)=>{if(!/^[a-z_]+$/.test(value)) throw new Error('Invalid fixture identifier');return `"${value}"`;};
+const tables=new Set(['profiles','households','household_members','invitations','accounts','categories','transactions','transfers','savings_goals','planned_expenses','board_items','push_subscriptions']);
+const rpcs=new Set(['create_household','create_invitation','accept_invitation','remove_member','revoke_invitation','account_balances','list_entries','finance_summary','list_planned_expenses','pay_planned_expense','export_finances','set_board_task','set_board_reminder','subscribe_board_push']);
+const identifier=(value:string)=>{if(!/^[a-z_][a-z0-9_]*$/.test(value)) throw new Error('Invalid fixture identifier');return `"${value}"`;};
 createServer(async(req,res)=>{
   const url=new URL(req.url || '/','http://127.0.0.1:54329');
   const send=(status:number,value:unknown)=>{res.writeHead(status,{'Content-Type':'application/json','Access-Control-Allow-Origin':'*'});res.end(JSON.stringify(value,(key,v)=>['date','target_date'].includes(key) && typeof v==='string' ? v.slice(0,10) : typeof v==='bigint' ? String(v) : v));};
@@ -73,7 +73,7 @@ createServer(async(req,res)=>{
     lastLogoutScope=null;
     requestCounts={};
     requestDelay=0;
-    await db.exec(`update profiles set display_name='Test Owner' where id='${owner}';update profiles set display_name='Test Member' where id='${member}';delete from planned_expenses;delete from transfers;delete from transactions where note not like 'Fixture expense %';delete from savings_goals where name<>'Emergency fund';delete from accounts where id not in ('${cash}','${savings}');delete from categories where name like 'Browser category%';`);
+    await db.exec(`update profiles set display_name='Test Owner' where id='${owner}';update profiles set display_name='Test Member' where id='${member}';delete from board_items;delete from push_subscriptions;delete from planned_expenses;delete from transfers;delete from transactions where note not like 'Fixture expense %';delete from savings_goals where name<>'Emergency fund';delete from accounts where id not in ('${cash}','${savings}');delete from categories where name like 'Browser category%';`);
     send(200,{reset:true});return;
   }
   if(url.pathname==='/test/session'){
@@ -96,7 +96,7 @@ createServer(async(req,res)=>{
         const fn=url.pathname.split('/').at(-1)!;if(!rpcs.has(fn)) throw new Error('Unknown fixture RPC');
         const entries=Object.entries(input);
         const args=entries.map(([key],i)=>`${identifier(key)} => $${i+1}`).join(',');
-        const rows=(await tx.query<Record<string,unknown>>(`select * from public.${identifier(fn)}(${args})`,entries.map(([,v])=>v))).rows;
+        const rows=(await tx.query<Record<string,unknown>>(`select * from public.${identifier(fn)}(${args})`,entries.map(([,v])=>typeof v==='object' && v!==null ? JSON.stringify(v) : v))).rows;
         return ['list_entries','account_balances'].includes(fn) ? rows : rows[0]?.[fn] ?? null;
       }
       const table=url.pathname.split('/').at(-1)!;if(!tables.has(table)) throw new Error('Unknown fixture table');
@@ -113,11 +113,11 @@ createServer(async(req,res)=>{
       }
       if(req.method==='POST'){
         const entries=Object.entries(Array.isArray(input) ? input[0] : input);
-        return (await tx.query(`insert into public.${identifier(table)}(${entries.map(([k])=>identifier(k)).join(',')}) values(${entries.map((_,i)=>`$${i+1}`).join(',')}) returning ${select}`,entries.map(([,v])=>v))).rows;
+        return (await tx.query(`insert into public.${identifier(table)}(${entries.map(([k])=>identifier(k)).join(',')}) values(${entries.map((_,i)=>`$${i+1}`).join(',')}) returning ${select}`,entries.map(([,v])=>typeof v==='object' && v!==null ? JSON.stringify(v) : v))).rows;
       }
       if(req.method==='PATCH'){
         const entries=Object.entries(input);const offset=values.length;
-        return (await tx.query(`update public.${identifier(table)} set ${entries.map(([k],i)=>`${identifier(k)}=$${offset+i+1}`).join(',')}${where} returning ${select}`,[...values,...entries.map(([,v])=>v)])).rows;
+        return (await tx.query(`update public.${identifier(table)} set ${entries.map(([k],i)=>`${identifier(k)}=$${offset+i+1}`).join(',')}${where} returning ${select}`,[...values,...entries.map(([,v])=>typeof v==='object' && v!==null ? JSON.stringify(v) : v)])).rows;
       }
       if(req.method==='DELETE') return (await tx.query(`delete from public.${identifier(table)}${where} returning ${select}`,values)).rows;
       throw new Error('Unsupported fixture request');

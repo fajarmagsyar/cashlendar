@@ -7,6 +7,6 @@ export default defineConfig({
   projects:[{name:'desktop',use:{...devices['Desktop Chrome']}},{name:'mobile',use:{...devices['iPhone 13'],defaultBrowserType:'chromium'}}],
   webServer:[
     {command:'pnpm exec node --experimental-strip-types tests/e2e/supabase-fixture.ts',url:'http://127.0.0.1:54329/health',timeout:60000,reuseExistingServer:false},
-    {command:production ? 'pnpm build && pnpm start --port 3001' : 'pnpm dev --port 3001 --webpack',url:'http://localhost:3001/login',timeout:120000,reuseExistingServer:false,env:{NEXT_BUILD_DIR:production ? '.next-auth-production' : '.next-auth',NEXT_PUBLIC_SUPABASE_URL:'http://127.0.0.1:54329',NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'local-browser-test-only',NEXT_PUBLIC_APP_URL:'http://localhost:3001'}}
+    {command:production ? 'pnpm build && pnpm start --port 3001' : 'pnpm dev --port 3001 --webpack',url:'http://localhost:3001/login',timeout:120000,reuseExistingServer:false,env:{NEXT_BUILD_DIR:production ? '.next-auth-production' : '.next-auth',NEXT_PUBLIC_SUPABASE_URL:'http://127.0.0.1:54329',NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'local-browser-test-only',NEXT_PUBLIC_APP_URL:'http://localhost:3001',...(process.env.PUSH_E2E==='1' ? {NEXT_PUBLIC_VAPID_PUBLIC_KEY:'B'+'A'.repeat(86),VAPID_PRIVATE_KEY:'fixture-not-a-real-key',VAPID_SUBJECT:'mailto:fixture@example.com',SUPABASE_SERVICE_ROLE_KEY:'fixture-not-a-real-service-key',CRON_SECRET:'fixture-only-secret-do-not-deploy'} : {})}}
   ]
 });

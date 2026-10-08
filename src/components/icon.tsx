@@ -1,6 +1,9 @@
 import type { CSSProperties } from 'react';
-export type IconName = 'calendar'|'chart'|'list'|'wallet'|'savings'|'family'|'plus'|'left'|'right'|'close'|'logout'|'arrow'|'check'|'download'|'profile'|'settings';
+export type IconName = 'tools'|'board'|'bell'|'calendar'|'chart'|'list'|'wallet'|'savings'|'family'|'plus'|'left'|'right'|'close'|'logout'|'arrow'|'check'|'download'|'profile'|'settings';
 const paths: Record<IconName,string> = {
+  tools:'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
+  board:'M5 3h14v18H5zM8 7h8M8 11h8M8 15h5',
+  bell:'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4',
   profile:'M20 21v-2a7 7 0 0 0-14 0v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8',
   settings:'M4 7h16M4 17h16M9 4v6M15 14v6',
   calendar:'M6 3v4m12-4v4M3 10h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM7 14h2m6 0h2m-10 4h2',

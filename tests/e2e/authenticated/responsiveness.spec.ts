@@ -3,7 +3,7 @@ import {test,expect} from '@playwright/test';
 test.beforeEach(async({context,request})=>{
   await request.post('http://127.0.0.1:54329/test/reset');
   const {cookieName,cookieValue}=await (await request.get('http://127.0.0.1:54329/test/session')).json();
-  await context.addCookies([{name:cookieName,value:cookieValue,domain:'localhost',path:'/',sameSite:'Lax'}]);
+  await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{name:cookieName,value:cookieValue,domain:'localhost',path:'/',sameSite:'Lax'}]);
 });
 
 test('a calendar render shares authentication and account queries',async({page,request})=>{
@@ -21,7 +21,7 @@ test('a calendar render shares authentication and account queries',async({page,r
 test('verified asymmetric sessions render without an Auth user lookup',async({page,context,request})=>{
   const {cookieName,cookieValue}=await (await request.get('http://127.0.0.1:54329/test/session?asymmetric=1')).json();
   await context.clearCookies();
-  await context.addCookies([{name:cookieName,value:cookieValue,domain:'localhost',path:'/',sameSite:'Lax'}]);
+  await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{name:cookieName,value:cookieValue,domain:'localhost',path:'/',sameSite:'Lax'}]);
   await page.goto('/profile');
   await expect(page.getByRole('heading',{name:'Test Owner',exact:true})).toBeVisible();
   await expect(page.getByText('owner@example.com', {exact:true})).toBeVisible();
@@ -38,7 +38,7 @@ test('a forged identity is rejected before household data is loaded',async({page
   session.access_token=`${header}.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.${signature}`;
   session.user.id=claims.sub;
   await context.clearCookies();
-  await context.addCookies([{name:cookieName,value:`base64-${Buffer.from(JSON.stringify(session)).toString('base64url')}`,domain:'localhost',path:'/',sameSite:'Lax'}]);
+  await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/',sameSite:'Lax'},{name:cookieName,value:`base64-${Buffer.from(JSON.stringify(session)).toString('base64url')}`,domain:'localhost',path:'/',sameSite:'Lax'}]);
   await page.goto('/accounts');
   await expect(page).toHaveURL(/\/login/);
   const counts=await (await request.get('http://127.0.0.1:54329/test/request-counts')).json();
@@ -130,8 +130,8 @@ test('applying filters keeps the app mounted and shows immediate feedback',async
 test('returning to a visited menu uses the browser cache without waiting for RSC',async({page})=>{
   await page.goto('/accounts');
   const nav=page.getByRole('navigation',{name:'Main navigation'});
-  await nav.getByRole('link',{name:'Savings',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Savings',exact:true})).toBeVisible();
+  await nav.getByRole('link',{name:'More',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'More',exact:true})).toBeVisible();
   await nav.getByRole('link',{name:'Accounts',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Accounts',exact:true})).toBeVisible();
   let requests=0;
@@ -142,8 +142,8 @@ test('returning to a visited menu uses the browser cache without waiting for RSC
     await route.continue();
   });
   try {
-    await nav.getByRole('link',{name:'Savings',exact:true}).click();
-    await expect(page.getByRole('heading',{name:'Savings',exact:true})).toBeVisible({timeout:700});
+    await nav.getByRole('link',{name:'More',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'More',exact:true})).toBeVisible({timeout:700});
     expect(requests).toBe(0);
   } finally {release();}
 });
@@ -151,7 +151,7 @@ test('returning to a visited menu uses the browser cache without waiting for RSC
 test('the navbar indicator moves before a slow screen finishes loading',async({page})=>{
   await page.goto('/accounts');
   const nav=page.getByRole('navigation',{name:'Main navigation'});
-  await expect(nav.getByRole('link')).toHaveText(['Money','Accounts','Savings','Profile']);
+  await expect(nav.getByRole('link')).toHaveText(['Money','Accounts','More','Profile']);
   let release!:()=>void;
   const held=new Promise<void>(resolve=>{release=resolve;});
   await page.route('**/*',async route=>{
@@ -159,10 +159,10 @@ test('the navbar indicator moves before a slow screen finishes loading',async({p
     await route.continue();
   });
   try {
-    await nav.getByRole('link',{name:'Savings',exact:true}).click();
+    await nav.getByRole('link',{name:'More',exact:true}).click();
     const indicator=nav.locator('.navigation-indicator');
     await expect(indicator).toBeVisible({timeout:700});
-    const savings=nav.getByRole('link',{name:'Savings',exact:true});
+    const savings=nav.getByRole('link',{name:'More',exact:true});
     await expect(async()=>{
       const marker=await indicator.boundingBox(),tab=await savings.boundingBox();
       expect(marker).not.toBeNull();expect(tab).not.toBeNull();
@@ -171,7 +171,7 @@ test('the navbar indicator moves before a slow screen finishes loading',async({p
     }).toPass({timeout:1000});
     await expect(page.getByRole('heading',{name:'Accounts',exact:true})).toBeVisible();
   } finally {release();}
-  await expect(page.getByRole('heading',{name:'Savings',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'More',exact:true})).toBeVisible();
   await page.emulateMedia({reducedMotion:'reduce'});
   await expect(nav.locator('.navigation-indicator')).toHaveCSS('transition-duration','0s');
 });
@@ -186,7 +186,8 @@ test('saving an account invalidates a previously cached Savings screen',async({p
   await dialog.getByLabel('Account type').selectOption('savings');
   await dialog.getByRole('button',{name:'Save account',exact:true}).click();
   await expect(dialog).toHaveCount(0);
-  await nav.getByRole('link',{name:'Savings',exact:true}).click();
+  await nav.getByRole('link',{name:'More',exact:true}).click();
+  await page.getByRole('link',{name:/^Savings/}).click();
   await page.getByRole('button',{name:'Create savings goal',exact:true}).click();
   dialog=page.getByRole('dialog');
   await dialog.getByLabel('Savings account').selectOption({label:'Cached savings account'});
