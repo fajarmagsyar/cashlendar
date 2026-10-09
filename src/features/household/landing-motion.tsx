@@ -68,7 +68,7 @@ export function useLandingMotion(root:RefObject<HTMLDivElement|null>,playing:boo
           .from('.preview-detail',{x:32,opacity:0,duration:.7},2.2)
           .from('.landing-preview .landing-lottie',{scale:.7,opacity:0,duration:.7},2.1);
         for(const section of element.querySelectorAll('.landing-details,.landing-savings')) {
-          gsap.from(section.querySelectorAll('.landing-section-label,.landing-detail-copy,.landing-savings-content'),{y:36,opacity:0,duration:.9,stagger:.16,scrollTrigger:{trigger:section,start:'top 85%',once:true}});
+          gsap.from(section.querySelectorAll('figure'),{y:36,opacity:0,duration:.9,stagger:.16,scrollTrigger:{trigger:section,start:'top 85%',once:true}});
         }
         gsap.from('.landing-chart-line',{strokeDashoffset:1,duration:1.8,ease:'power2.inOut',scrollTrigger:{trigger:'.landing-chart-demo',start:'top 85%',once:true}});
         gsap.from('.landing-chart-dot',{scale:0,transformOrigin:'center',stagger:.12,duration:.4,scrollTrigger:{trigger:'.landing-chart-demo',start:'top 75%',once:true}});

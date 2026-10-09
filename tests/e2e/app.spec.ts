@@ -45,6 +45,7 @@ test('landing animation controls, Lottie illustrations and calendar demo work',a
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('/login');
   await expect(page.locator('.landing')).toHaveAttribute('data-motion-ready','true');
+  await expect(page.locator('.landing-description,.landing-eyebrow,.landing-detail-copy,.landing-login-note')).toHaveCount(0);
   await expect(page.locator('.landing-lottie>svg:not(.landing-lottie-fallback)')).toHaveCount(3);
   await page.getByRole('button',{name:'Tue 22',exact:true}).click();
   await expect(page.locator('.preview-detail')).toContainText('Salary');

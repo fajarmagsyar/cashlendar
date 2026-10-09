@@ -3,7 +3,6 @@ import {useI18n} from '@/components/language-provider';
 
 import { useState, useRef, useId, cloneElement, isValidElement, createContext, useContext, type ReactElement, type ReactNode, type FormEvent } from 'react';
 import type { ActionResult } from '@/lib/finance/types';
-import { LoadingAnimation } from './loading-animation';
 const FormErrors = createContext<Record<string,string>>({});
 export function ActionForm({ children, action, submit='Save', onSuccess,onPendingChange,className='',id,disabled=false,showSubmit=true }: {
   id?:string;disabled?:boolean;showSubmit?:boolean;children?:ReactNode; action:(input:Record<string,string>)=>Promise<ActionResult<unknown>>; submit?:string; onSuccess?:()=>void;onPendingChange?:(pending:boolean)=>void;className?:string;
@@ -31,7 +30,7 @@ export function ActionForm({ children, action, submit='Save', onSuccess,onPendin
     <FormErrors.Provider value={result && !result.ok ? result.fieldErrors || {} : {}}><div className="form-fields"><fieldset disabled={pending || disabled}>{children}</fieldset></div></FormErrors.Provider>
     {result && !result.ok && <div className="notice error-notice" role="alert"><p>{t(result.error)}</p></div>}
     {result?.ok && !onSuccess && <p className="success-text" role="status">{t("Saved.")}</p>}
-    {showSubmit && <button type="submit" className="button primary" disabled={pending || disabled}>{pending && <LoadingAnimation/>}{pending ? t("Saving…") : t(submit)}</button>}
+    {showSubmit && <button type="submit" className="button primary" disabled={pending || disabled}>{pending ? t("Saving…") : t(submit)}</button>}
     <span className="sr-only" role="status">{pending ? t("Saving…") : ''}</span>
   </form>;
 }

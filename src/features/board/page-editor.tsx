@@ -2,7 +2,6 @@
 import {useEffect,useState,useSyncExternalStore} from 'react';
 import {useRouter} from 'next/navigation';
 import {Icon,type IconName} from '@/components/icon';
-import {LoadingAnimation} from '@/components/loading-animation';
 import {EditorAction} from './editor-action';
 import {ActionForm,Field} from '@/components/action-form';
 import {DatePicker} from '@/components/date-picker';
@@ -66,6 +65,6 @@ export function BoardPageEditor({item:incomingItem,initialDocument}:{item?:Board
       <div className="add-block-tools" role="group" aria-label={t('Add content')}>{(['text','checklist','table','drawing'] as const).map(type=><EditorAction key={type} label={{text:'Text',checklist:'Checklist',table:'Table',drawing:'Drawing'}[type]} icon={type==='drawing' ? 'pen' : type as IconName} disabled={doc.blocks.length>=50} onClick={()=>add(type)}/>)}<EditorAction label="Add a reminder" icon="bell" aria-pressed={reminder} onClick={()=>{setReminder(!reminder);setDirty(true);}}/></div>
       {reminder && <div className="page-reminder-settings"><div className="form-row" onChange={()=>setDirty(true)}><Field label="Date"><DatePicker name="date" onChange={()=>setDirty(true)} defaultValue={due.slice(0,10) || todayJakarta()} required/></Field><Field label="Time"><input name="time" type="time" required defaultValue={due.slice(11,16) || '09:00'}/></Field></div></div>}
     </ActionForm>
-    <EditorAction label={pending ? 'Saving…' : 'Save page'} icon="save" type="submit" form="board-page-form" className="editor-save" disabled={pending || !ready}>{pending ? <LoadingAnimation/> : undefined}</EditorAction>
+    <EditorAction label={pending ? 'Saving…' : 'Save page'} icon="save" type="submit" form="board-page-form" className="editor-save" disabled={pending || !ready}/>
   </section>;
 }

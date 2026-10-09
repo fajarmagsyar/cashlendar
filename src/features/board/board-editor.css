@@ -78,7 +78,6 @@
 .board-editor .editor-action:active {scale:.96}
 .board-editor .editor-action[aria-pressed=true] {background:var(--green-soft);color:var(--green);box-shadow:inset 0 0 0 1px #b5c8ba}
 .board-editor .editor-action.editor-save {position:fixed;right:calc(20px + env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;width:56px;height:56px;border:0;border-radius:18px;background:var(--green);color:white;box-shadow:0 6px 18px #18352630;display:grid;place-items:center}
-.board-editor .editor-save .loading-animation {width:22px;height:22px;color:inherit}
 .page-editor-form> .form-fields>fieldset>.field:first-of-type>label {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 .block-controls {padding:2px 12px;background:transparent}
 .text-format-tools,.sheet-tools,.drawing-tools {gap:2px;padding:4px 10px}

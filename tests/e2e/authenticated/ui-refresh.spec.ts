@@ -21,7 +21,18 @@ test('note editor uses a compact title and a floating save action',async({page})
   expect(viewport.height-box!.y-box!.height).toBeLessThanOrEqual(56);
   await title.fill('Browser note');
   await page.getByLabel('Teks bagian 1').fill('Catatan singkat.');
-  await save.click();
+  let release!:()=>void;
+  const held=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**/*',async route=>{
+    if(route.request().headers()['next-action']) await held;
+    await route.continue();
+  });
+  try {
+    await save.click();
+    await expect(page.locator('.editor-save')).toBeDisabled();
+    await expect(page.locator('.editor-save svg')).toBeVisible();
+    await expect(page.locator('.board-editor .loading-animation')).toHaveCount(0);
+  } finally {release();}
   await expect(page).toHaveURL('/board');
   await expect(page.getByRole('article',{name:'Browser note'})).toBeVisible();
   await page.setViewportSize({width:390,height:850});

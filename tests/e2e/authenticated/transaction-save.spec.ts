@@ -33,7 +33,7 @@ test('a slow transaction save locks the dialog and confirms a single saved entry
       form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
     });
     await expect(dialog.getByRole('button',{name:'Saving…',exact:true})).toBeDisabled({timeout:700});
-    await expect(dialog.locator('.loading-animation')).toBeVisible();
+    await expect(dialog.locator('.loading-animation')).toHaveCount(0);
     await expect(dialog.getByLabel('Amount (IDR)')).toBeDisabled();
     await expect(dialog.getByRole('button',{name:'Close dialog'})).toBeDisabled();
     await page.keyboard.press('Escape');
