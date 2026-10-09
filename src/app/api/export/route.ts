@@ -30,7 +30,8 @@ export async function GET(request:Request) {
     }
     const bytes=await createFinanceWorkbook(report,filters.month);
     return new Response(new Uint8Array(bytes),{headers:{...headers,'Content-Type':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','Content-Disposition':`attachment; filename="cashlendar-${filters.month}.xlsx"`}});
-  } catch {
+  } catch(error) {
+    console.error('Finance export failed:',error);
     return Response.json({error:'Could not export. Please try again.'},{status:503,headers});
   }
 }

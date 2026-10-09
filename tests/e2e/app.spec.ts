@@ -40,3 +40,39 @@ test('PWA manifest, install icons, and offline navigation work without caching p
   await page.getByRole('link',{name:'Try again'}).click();
   await expect(page.getByText('Connect Supabase to get started')).toBeVisible();
 });
+
+test('landing animation controls, Lottie illustrations and calendar demo work',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.goto('/login');
+  await expect(page.locator('.landing')).toHaveAttribute('data-motion-ready','true');
+  await expect(page.locator('.landing-lottie>svg:not(.landing-lottie-fallback)')).toHaveCount(3);
+  await page.getByRole('button',{name:'Tue 22',exact:true}).click();
+  await expect(page.locator('.preview-detail')).toContainText('Salary');
+  await expect(page.locator('.preview-detail-amount')).toHaveText('+Rp 7.500.000');
+  await page.getByRole('button',{name:'Sun 27',exact:true}).click();
+  await expect(page.locator('.preview-detail')).toContainText('Planned');
+  await page.getByRole('button',{name:'Wed 23',exact:true}).click();
+  await expect(page.locator('.preview-detail')).toContainText('No transactions on this day.');
+  await page.getByRole('button',{name:'Pause animations'}).click();
+  await expect(page.locator('.landing')).toHaveAttribute('data-animations','paused');
+  await expect(page.getByRole('button',{name:'Replay animation'})).toBeDisabled();
+  await page.getByRole('button',{name:'Play animations'}).click();
+  await expect(page.locator('.landing')).toHaveAttribute('data-motion-ready','true');
+  await page.getByRole('button',{name:'Replay animation'}).click();
+  await page.locator('.landing-savings').scrollIntoViewIfNeeded();
+  await expect.poll(()=>page.locator('.preview-savings progress').evaluate(element=>(element as HTMLProgressElement).value)).toBe(40);
+  for(const width of [320,390,768,1440]) {
+    await page.setViewportSize({width,height:900});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Landing at ${width}`).toBe(true);
+  }
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(page.locator('.landing')).toHaveAttribute('data-animations','paused');
+  await expect(page.getByRole('button',{name:'Play animations'})).toBeDisabled();
+  await expect(page.locator('.preview-savings progress')).toHaveAttribute('value','40');
+  await page.getByRole('button',{name:'Mon 21',exact:true}).click();
+  await expect(page.locator('.preview-detail')).toContainText('Groceries');
+  await page.setViewportSize({width:test.info().project.name==='mobile' ? 390 : 1440,height:900});
+  await page.evaluate(()=>{if(document.activeElement instanceof HTMLElement) document.activeElement.blur();});
+  await page.screenshot({path:`/tmp/cashlendar-landing-${test.info().project.name}.png`,fullPage:true});
+  expect(errors).toEqual([]);
+});

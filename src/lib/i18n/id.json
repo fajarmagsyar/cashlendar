@@ -468,5 +468,12 @@
   "More filters": "Filter lainnya",
   "Nothing yet": "Belum ada",
   "Preparing {format}…": "Menyiapkan {format}…",
-  "Add note": "Tambah catatan"
+  "Add note": "Tambah catatan",
+  "Pause animations": "Jeda animasi",
+  "Play animations": "Putar animasi",
+  "Replay animation": "Ulangi animasi",
+  "Choose a day. See the details.": "Pilih tanggal. Lihat rinciannya.",
+  "No transactions on this day.": "Belum ada transaksi hari ini.",
+  "Spent this week": "Pengeluaran minggu ini",
+  "Daily expenses for the example week": "Pengeluaran harian untuk contoh minggu ini"
 }

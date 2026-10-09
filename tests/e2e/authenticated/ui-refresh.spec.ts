@@ -1,3 +1,4 @@
+import {readFile} from 'node:fs/promises';
 import {test,expect} from '@playwright/test';
 test.beforeEach(async({context,request})=>{
   await request.post('http://127.0.0.1:54329/test/reset');
@@ -42,7 +43,11 @@ test('export shows a focused loading state while preparing the selected format',
     await expect(dialog.locator('.export-options')).toHaveCount(0);
     await expect(dialog.getByRole('button',{name:'Tutup dialog'})).toBeDisabled();
   } finally {release();}
-  expect((await download).suggestedFilename()).toBe('cashlendar-2026-01.pdf');
+  const pdf=await download;
+  expect(pdf.suggestedFilename()).toBe('cashlendar-2026-01.pdf');
+  const bytes=await readFile((await pdf.path())!);
+  expect(bytes.subarray(0,5).toString()).toBe('%PDF-');
+  expect(bytes.toString()).toContain('%%EOF');
   await expect(dialog).toHaveCount(0);
 });
 test('accounts, settings, chart, exports and fridge notes work at all widths',async({page},testInfo)=>{
@@ -137,4 +142,14 @@ test('page movement follows tab position and reverses nested navigation',async({
   await expect(page.locator('.route-page')).toHaveAttribute('data-motion','zoom-out');
   await page.getByRole('navigation').filter({visible:true}).getByRole('link',{name:'Keuangan',exact:true}).click();
   await expect(page.locator('.route-page')).toHaveAttribute('data-motion','slide-right');
+});
+
+
+test('production PDF export includes its fonts without a build-machine path',async()=>{
+  test.skip(process.env.AUTH_E2E_PRODUCTION!=='1','Production packaging check');
+  const directory='.next-auth-production/server/app/api/export';
+  const trace=JSON.parse(await readFile(`${directory}/route.js.nft.json`,'utf8')) as {files:string[]};
+  expect(trace.files.some(file=>file.includes('pdfkit') && file.endsWith('/Helvetica.cjs'))).toBe(true);
+  const bundle=await readFile(`${directory}/route.js`,'utf8');
+  expect(bundle).not.toMatch(/file:\/\/[^"\s]+\/pdfkit\/js\/pdfkit\.node\.mjs/);
 });

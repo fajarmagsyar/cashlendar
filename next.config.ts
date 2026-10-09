@@ -3,6 +3,10 @@ const config: NextConfig = {
   distDir: process.env.NEXT_BUILD_DIR || '.next',
   poweredByHeader: false,
   devIndicators: false,
+  serverExternalPackages: ['pdfkit'],
+  outputFileTracingIncludes: {
+    '/api/export': ['./node_modules/pdfkit/js/standard-fonts/**/*'],
+  },
   experimental: {
     staleTimes: { dynamic:30, static:30 },
   },

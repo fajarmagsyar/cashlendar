@@ -1,0 +1,38 @@
+.landing{overflow:clip}
+.landing-intro h1>span,.landing-intro h1>em{display:block}
+.landing-motion-toggle,.landing-replay{display:grid;place-items:center;flex-shrink:0;width:44px;height:44px;border:1px solid #cbcbbd;background:transparent;border-radius:50%;color:var(--landing-ink)}
+.landing-motion-toggle:hover,.landing-replay:hover{background:#e5ecdf}
+.landing-preview{perspective:1000px}
+.landing-preview>figcaption{gap:12px}
+.landing-preview>figcaption>span:nth-child(2){margin-left:auto}
+.landing-replay{width:36px;height:36px}
+button.preview-day{background:transparent;border:0;border-right:1px solid #d4d8cb;border-radius:0;color:var(--landing-ink);text-align:left;position:relative;transition:background .2s}
+button.preview-day.preview-selected{background:#e5ecdf}
+button.preview-day.preview-planned{background:#f1eee2}
+button.preview-day:hover{background:#e9eddf}
+.landing .preview-detail-amount.income{color:#087c42}
+.landing .preview-detail-amount.planned{color:#69634c}
+.landing-preview-caption{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:78px;margin:-8px 0 0}
+.landing-preview-caption p{font-size:12px;color:#596452;margin:0}
+.landing-lottie{position:relative;display:block;width:112px;height:112px;color:#174f3e;flex-shrink:0}
+.landing-lottie>svg{width:100%;height:100%;display:block}
+.landing-lottie:has(>svg:not(.landing-lottie-fallback))>.landing-lottie-fallback{display:none}
+.landing-preview-caption .landing-lottie{width:88px;height:88px}
+.landing-section-label{position:relative;padding-top:12px}
+.landing-section-label>.landing-lottie{margin-bottom:0;order:3;width:140px;height:140px;margin-top:8px}
+.landing-chart-demo{margin:28px 0 0;padding:20px 0 0;border-top:1px solid #cbcbbd;max-width:455px;color:#596452}
+.landing-chart-demo figcaption{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;margin-bottom:20px}
+.landing-chart-demo figcaption small{font-size:10px}
+.landing-chart-demo svg{display:block;width:100%;height:auto;overflow:visible}
+.landing-chart-grid{color:#d4d8cb}
+@media(max-width:760px){
+  .landing-header-actions{gap:4px}
+  .landing-motion-toggle{width:36px;height:36px}
+  .landing-section-label{padding-right:100px;min-height:120px}
+  .landing-section-label>.landing-lottie{position:absolute;right:0;top:12px;width:100px;height:100px;margin:0}
+  .landing-section-label h2{font-size:30px}
+  .landing-chart-demo{max-width:540px}
+  .landing-preview-caption{min-height:68px}
+}
+@media(max-width:360px){.landing-brand{font-size:18px;gap:5px}.landing-brand svg{width:19px}.landing-header-actions select{max-width:110px}.landing-header{gap:8px}.landing-section-label{padding-right:80px}.landing-section-label>.landing-lottie{width:80px;height:80px}}
+@media(prefers-reduced-motion:reduce){button.preview-day{transition:none}}
