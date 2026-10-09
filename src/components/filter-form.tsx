@@ -3,6 +3,7 @@ import {useI18n} from '@/components/language-provider';
 
 import { useTransition, type FormEvent, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import {Icon} from './icon';
 
 export function FilterForm({ action, children, clear }: { action:string; children:ReactNode; clear?:ReactNode }) {
   const {t}=useI18n();
@@ -19,7 +20,7 @@ export function FilterForm({ action, children, clear }: { action:string; childre
 
   return <form action={action} onSubmit={submit} className="filter-form" aria-busy={pending}>
     {children}
-    <button className="button small" disabled={pending}>{pending ? t("Applying…") : t("Apply")}</button>
+    <button className="button small filter-apply" disabled={pending} aria-label={pending ? t("Applying…") : t("Apply")} title={t("Apply")}><Icon name="check" size={18}/></button>
     {clear}
   </form>;
 }

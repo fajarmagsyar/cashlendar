@@ -6,18 +6,18 @@ test.beforeEach(async({context,request})=>{
   await context.addCookies([{name:'cashlendar-language',value:'en',domain:'localhost',path:'/'},{name:session.cookieName,value:session.cookieValue,domain:'localhost',path:'/'}]);
 });
 
-test('More opens family tools and remains selected inside Savings and the board',async({page},testInfo)=>{
+test('More opens family tools with the dock hidden inside Savings and the board',async({page},testInfo)=>{
   await page.goto('/more');
   const nav=page.getByRole('navigation',{name:'Main navigation'});
   await expect(nav.getByRole('link')).toHaveText(['Money','Accounts','More','Profile']);
   await page.screenshot({path:`/tmp/cashlendar-more-${testInfo.project.name}.png`,fullPage:true});
   await page.getByRole('link',{name:/^Savings/}).click();
   await expect(page.getByRole('heading',{name:'Savings',exact:true})).toBeVisible();
-  await expect(nav.getByRole('link',{name:'More',exact:true})).toHaveAttribute('aria-current','page');
+  await expect(nav).toHaveCount(0);
   await page.getByRole('link',{name:'More',exact:true}).filter({has:page.locator('svg')}).first().click();
-  await page.getByRole('link',{name:/^Family board/}).click();
-  await expect(page.getByRole('heading',{name:'Family board',exact:true})).toBeVisible();
-  await expect(nav.getByRole('link',{name:'More',exact:true})).toHaveAttribute('aria-current','page');
+  await page.getByRole('link',{name:/^Fridge Notes/}).click();
+  await expect(page.getByRole('heading',{name:'Fridge Notes',exact:true})).toBeVisible();
+  await expect(nav).toHaveCount(0);
   for(const width of [320,390,768,1440]) {
     await page.setViewportSize({width,height:800});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -110,25 +110,27 @@ test('phone reminders require each signed-in member to opt in and can be disable
     Object.defineProperty(navigator,'serviceWorker',{value:{register:async()=>registration,getRegistration:async()=>registration,ready:Promise.resolve(registration)},configurable:true});
   });
   await page.goto('/board');
+  await page.locator('.phone-notifications summary').click();
   const enable=page.getByRole('button',{name:'Enable notifications',exact:true});await expect(enable).toBeVisible();
   await page.evaluate(()=>{(window as unknown as {__pushPermission:{value:string}}).__pushPermission.value='denied';});
   await enable.click();await expect(page.locator('.phone-notifications').getByRole('alert')).toContainText('Allow notifications');
   await page.evaluate(()=>{(window as unknown as {__pushPermission:{value:string}}).__pushPermission.value='granted';});
   await enable.click();await expect(page.getByRole('button',{name:'Disable notifications'})).toBeVisible();
-  await page.reload();await expect(page.getByRole('button',{name:'Disable notifications'})).toBeVisible();
+  await page.reload();await page.locator('.phone-notifications summary').click();await expect(page.getByRole('button',{name:'Disable notifications'})).toBeVisible();
   const member=await (await request.get('http://127.0.0.1:54329/test/session?member=1')).json();
   await context.addCookies([{name:member.cookieName,value:member.cookieValue,domain:'localhost',path:'/'}]);await page.reload();
+  await page.locator('.phone-notifications summary').click();
   await expect(enable).toBeVisible();await enable.click();
   await expect(page.getByRole('button',{name:'Disable notifications'})).toBeVisible();
   await page.getByRole('button',{name:'Disable notifications'}).click();await expect(enable).toBeVisible();
-  await page.reload();await expect(enable).toBeVisible();
+  await page.reload();await page.locator('.phone-notifications summary').click();await expect(enable).toBeVisible();
 });
 
 test('the tools and full-page editor use Indonesian by default',async({page,context,request})=>{
   await context.clearCookies();const session=await (await request.get('http://127.0.0.1:54329/test/session')).json();
   await context.addCookies([{name:session.cookieName,value:session.cookieValue,domain:'localhost',path:'/'}]);await page.goto('/more');
-  await expect(page.getByRole('heading',{name:'Lainnya',exact:true})).toBeVisible();await page.getByRole('link',{name:/^Papan keluarga/}).click();
-  await expect(page.getByRole('heading',{name:'Papan keluarga',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Lainnya',exact:true})).toBeVisible();await page.getByRole('link',{name:/^Catatan Kulkas/}).click();
+  await expect(page.getByRole('heading',{name:'Catatan Kulkas',exact:true})).toBeVisible();
   await page.getByRole('link',{name:'Halaman baru',exact:true}).first().click();
   await expect(page.getByLabel('Judul',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Daftar tugas',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Tabel',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Gambar',exact:true})).toBeVisible();

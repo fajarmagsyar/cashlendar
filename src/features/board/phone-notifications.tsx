@@ -52,8 +52,8 @@ export function PhoneNotifications({configured}:{configured:boolean}) {
     }catch{setError('Could not enable notifications. Please try again.');}
     finally{setPending(false);}
   }
-  const hint=!configured ? 'Phone reminders will be available once notifications are set up.' : support==='ios' ? 'On iPhone, add Cashlendar to your Home Screen, then enable notifications here.' : support==='unsupported' ? 'This browser does not support phone notifications.' : enabled ? 'This device will receive family reminders, even with the app closed.' : 'Enable on each device that should receive family reminders.';
-  return <section className="phone-notifications" aria-label={t('Phone reminders')}><div><p><Icon name="bell"/> {t('Phone reminders')}</p><small>{t(hint)}</small>{error && <p role="alert" className="error-text">{t(error)}</p>}</div>
+  const hint=!configured ? 'Phone notifications are not set up yet.' : support==='ios' ? 'Add Cashlendar to your Home Screen to enable reminders.' : support==='unsupported' ? 'This browser does not support phone notifications.' : enabled ? 'Reminders will appear on this phone.' : 'Receive a notification when a reminder is due.';
+  return <details className="phone-notifications" aria-label={t('Phone reminders')}><summary><Icon name="bell"/>{t('Phone reminders')}<span>{t(enabled ? 'On' : 'Off')}</span></summary><div><small>{t(hint)}</small>{error && <p role="alert" className="error-text">{t(error)}</p>}
     {configured && support==='supported' && <button className="button secondary" disabled={pending} onClick={toggle}>{t(pending ? 'Saving…' : enabled ? 'Disable notifications' : 'Enable notifications')}</button>}
-  </section>;
+  </div></details>;
 }

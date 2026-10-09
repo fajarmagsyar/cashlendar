@@ -7,6 +7,7 @@ import { InstallGuidance } from '@/components/pwa';
 import { requireHousehold } from '@/lib/supabase/server';
 import {getProfile} from '@/features/profile/queries';
 import { SaveFeedbackProvider } from '@/components/save-feedback';
+import {PageTransition} from '@/components/page-transition';
 export const dynamic='force-dynamic';
 export default async function AppLayout({children}:{children:React.ReactNode}) {
   const {t}=await getTranslations();
@@ -18,6 +19,6 @@ export default async function AppLayout({children}:{children:React.ReactNode}) {
       <InstallGuidance/>
     </header>
     <Navigation accounts={accounts} categories={categories}/>
-    <div className="app-content"><main id="main">{children}</main></div>
+    <div className="app-content"><main id="main"><PageTransition>{children}</PageTransition></main></div>
   </div></SaveFeedbackProvider>;
 }

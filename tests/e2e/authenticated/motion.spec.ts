@@ -38,7 +38,7 @@ test('reduced motion removes decorative movement and preserves focus and popover
   await dialog.getByRole('button',{name:'Close dialog'}).click();await expect(dialog).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Add transaction',exact:true})).toBeFocused();
   await page.goto('/more');
-  const tool=page.getByRole('link',{name:/^Family board/});await tool.hover();
+  const tool=page.getByRole('link',{name:/^Fridge Notes/});await tool.hover();
   await expect(tool).toHaveCSS('transform','none');await expect(tool).toHaveCSS('animation-name','none');
-  await tool.click();await expect(page.getByRole('heading',{name:'Family board',exact:true})).toBeVisible();
+  await tool.click();await expect(page.getByRole('heading',{name:'Fridge Notes',exact:true})).toBeVisible();
 });

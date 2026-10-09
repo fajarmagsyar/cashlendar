@@ -7,7 +7,7 @@ import { entrySchema, accountSchema, categorySchema, goalSchema, plannedExpenseS
 import { validDate,todayJakarta } from '@/lib/finance/dates';
 import type { ActionResult } from '@/lib/finance/types';
 
-function refresh() { for (const path of ['/', '/charts', '/list', '/accounts', '/savings', '/family']) revalidatePath(path); }
+function refresh() { for (const path of ['/', '/charts', '/list', '/accounts', '/savings', '/family', '/settings']) revalidatePath(path); }
 function failure(error: unknown): ActionResult {
   unstable_rethrow(error);
   if (error instanceof z.ZodError) return { ok:false, error:'Please check the highlighted fields.', fieldErrors:Object.fromEntries(error.issues.map(i => [String(i.path[0]),i.message])) };

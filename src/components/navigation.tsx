@@ -8,6 +8,7 @@ import {Icon,type IconName} from './icon';
 import {EntryButton} from '@/features/finance/entry-dialog';
 import {todayJakarta,validDate,getMonthRange} from '@/lib/finance/dates';
 import type {Account,Category} from '@/lib/finance/types';
+import {isNestedRoute} from '@/lib/navigation-motion';
 const links:{href:string;name:string;icon:IconName}[]=[
   {href:'/',name:'Money',icon:'calendar'},
   {href:'/accounts',name:'Accounts',icon:'wallet'},{href:'/more',name:'More',icon:'tools'},{href:'/profile',name:'Profile',icon:'profile'}
@@ -36,7 +37,7 @@ export function Navigation({accounts,categories}:{accounts:Account[];categories:
     setDestination(href);
     startTransition(()=>router.push(href));
   }
-  if(path.startsWith('/board/')) return null;
+  if(isNestedRoute(path)) return null;
   return <>
     <nav aria-label={t("Main navigation")} className="navigation glass-navigation desktop-navigation" style={{'--active-index':desktopIndex} as CSSProperties}>
       <span className="navigation-indicator" aria-hidden="true"/>

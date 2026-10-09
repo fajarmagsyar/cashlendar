@@ -109,6 +109,7 @@ test('saving updates the page without a second refresh request',async({page})=>{
 
 test('applying filters keeps the app mounted and shows immediate feedback',async({page})=>{
   await page.goto('/?view=list&month=2026-01');
+  await page.locator('.filter-more summary').click();
   await page.getByRole('searchbox',{name:'Search entries'}).fill('Fixture expense 55');
   let documents=0;
   page.on('request',request=>{if(request.isNavigationRequest()) documents++;});

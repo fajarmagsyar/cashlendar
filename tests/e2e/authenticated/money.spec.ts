@@ -15,7 +15,7 @@ test('mobile Money tabs retain filters and the dock adds from any screen',async(
   await expect(page.locator('.entry-row')).toHaveCount(50);
   await expect(page.locator('.entry-row').first().getByText(/Recorded by/)).toBeVisible();
   await tabs.getByRole('tab',{name:'Charts',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Where it went'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Expenses by category'})).toBeVisible();
   await expect(page).toHaveURL(/month=2026-01/);
   await tabs.getByRole('tab',{name:'Calendar',exact:true}).click();
   await expect(page.getByRole('link',{name:/Tuesday, January 6/})).toHaveAttribute('aria-current','date');
@@ -36,7 +36,8 @@ test('mobile Money tabs retain filters and the dock adds from any screen',async(
 test('Excel export includes every matching entry and recorder beyond the visible page',async({page,context})=>{
   await page.goto('/?view=list&month=2026-01');
   const downloadPromise=page.waitForEvent('download');
-  await page.getByRole('button',{name:'Export Excel'}).click();
+  await page.getByRole('button',{name:'Export',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:/Excel/}).click();
   const download=await downloadPromise;expect(download.suggestedFilename()).toBe('cashlendar-2026-01.xlsx');
   const workbook=new ExcelJS.Workbook();await workbook.xlsx.readFile((await download.path())!);
   const transactions=workbook.getWorksheet('Transactions')!;
