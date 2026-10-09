@@ -1,4 +1,5 @@
-import {readFile} from 'node:fs/promises';
+import {readFile,realpath} from 'node:fs/promises';
+import {resolve} from 'node:path';
 import {test,expect} from '@playwright/test';
 test.beforeEach(async({context,request})=>{
   await request.post('http://127.0.0.1:54329/test/reset');
@@ -150,6 +151,10 @@ test('production PDF export includes its fonts without a build-machine path',asy
   const directory='.next-auth-production/server/app/api/export';
   const trace=JSON.parse(await readFile(`${directory}/route.js.nft.json`,'utf8')) as {files:string[]};
   expect(trace.files.some(file=>file.includes('pdfkit') && file.endsWith('/Helvetica.cjs'))).toBe(true);
+  for(const file of trace.files.filter(file=>file.includes('/standard-fonts/'))) {
+    const filename=resolve(directory,file);
+    expect(await realpath(filename),`Font must use its real path: ${file}`).toBe(filename);
+  }
   const bundle=await readFile(`${directory}/route.js`,'utf8');
   expect(bundle).not.toMatch(/file:\/\/[^"\s]+\/pdfkit\/js\/pdfkit\.node\.mjs/);
 });
