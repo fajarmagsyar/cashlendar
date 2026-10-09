@@ -6,12 +6,13 @@ import {getProfile} from '@/features/profile/queries';
 import {EditProfileButton} from '@/features/profile/profile-controls';
 import {switchGoogleAccount} from '@/features/profile/actions';
 import {signOut} from '@/features/household/actions';
+import {ProfileAvatar} from '@/components/profile-avatar';
 export default async function Profile() {
   const {t}=await getTranslations();
   const [profile,{household,membership}]=await Promise.all([getProfile(),requireHousehold()]);
   return <><div className="page-heading"><h1>{t("Profile")}</h1></div>
     <div className="profile-layout">
-      <section className="panel profile-identity"><span className="avatar profile-avatar" aria-hidden="true">{profile.display_name.slice(0,1).toUpperCase()}</span><div className="profile-details"><h2>{profile.display_name}</h2><p>{profile.email}</p></div><EditProfileButton name={profile.display_name}/></section>
+      <section className="panel profile-identity"><ProfileAvatar name={profile.display_name} photoUrl={profile.avatar_url} className="profile-avatar"/><div className="profile-details"><h2>{profile.display_name}</h2><p>{profile.email}</p></div><EditProfileButton name={profile.display_name}/></section>
       <section className="panel profile-menu" aria-label={t("Profile shortcuts")}>
         <Link href="/family" className="profile-menu-row"><Icon name="family"/><span><strong>{t("Family")}</strong><small>{household.name} · {membership.role==='owner' ? t("Owner") : t("Member")}</small></span><Icon name="right" size={18}/></Link>
         <Link href="/settings" className="profile-menu-row"><Icon name="settings"/><span><strong>{t("Settings")}</strong></span><Icon name="right" size={18}/></Link>

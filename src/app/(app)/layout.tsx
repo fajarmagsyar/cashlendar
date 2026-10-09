@@ -8,6 +8,7 @@ import { requireHousehold } from '@/lib/supabase/server';
 import {getProfile} from '@/features/profile/queries';
 import { SaveFeedbackProvider } from '@/components/save-feedback';
 import {PageTransition} from '@/components/page-transition';
+import {ProfileAvatar} from '@/components/profile-avatar';
 export const dynamic='force-dynamic';
 export default async function AppLayout({children}:{children:React.ReactNode}) {
   const {t}=await getTranslations();
@@ -15,10 +16,10 @@ export default async function AppLayout({children}:{children:React.ReactNode}) {
   const display=profile.display_name;
   return <SaveFeedbackProvider><div className="app-shell">
     <header className="app-header"><Link href="/" className="brand"><span className="brand-symbol"><Icon name="calendar" size={22}/></span>Cashlendar</Link>
-      <span className="header-household">{household.name}</span><Link href="/profile" aria-label={t("Open profile")} className="header-user profile-header-link"><span className="avatar" aria-hidden="true">{display.slice(0,1).toUpperCase()}</span><span>{display}</span></Link>
+      <span className="header-household">{household.name}</span><Link href="/profile" aria-label={t("Open profile")} className="header-user profile-header-link"><ProfileAvatar name={display} photoUrl={profile.avatar_url}/><span>{display}</span></Link>
       <InstallGuidance/>
     </header>
-    <Navigation accounts={accounts} categories={categories}/>
+    <Navigation accounts={accounts} categories={categories} profile={{name:display,photoUrl:profile.avatar_url}}/>
     <div className="app-content"><main id="main"><PageTransition>{children}</PageTransition></main></div>
   </div></SaveFeedbackProvider>;
 }

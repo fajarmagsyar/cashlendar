@@ -20,6 +20,6 @@ export default async function Savings() {
         {!goal.archived_at && <div className="goal-funding"><EntryButton accounts={accounts} categories={categories} defaultKind="transfer" destination={goal.account_id} label={t("Add savings")}/><EntryButton accounts={accounts} categories={categories} defaultKind="transfer" defaultAccount={goal.account_id} label={t("Withdraw")}/></div>}
         <div className="card-actions"><GoalButton accounts={accounts} goal={goal}/><ArchiveButton table="savings_goals" id={goal.id} name={goal.name} archived={Boolean(goal.archived_at)}/></div>
       </article>;
-    })}</section> : <section className="panel empty-state"><Icon name="savings" size={32}/><h2>{t("No savings goals yet")}</h2><GoalButton accounts={accounts}/></section>}
+    })}</section> : <section className="fridge-empty"><p>{t('Nothing yet')}</p></section>}
   </>;
 }

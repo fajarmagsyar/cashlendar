@@ -8,7 +8,7 @@ test.beforeEach(async ({ context, request }) => {
 });
 
 test('select menus use the app theme and retain filtering and keyboard selection', async ({ page }) => {
-  await page.goto('/?month=2026-01&day=2026-01-06');
+  await page.goto('/?view=list&month=2026-01&day=2026-01-06');
   const accounts = page.getByRole('combobox', { name: 'Filter by account' });
   await expect(accounts).toHaveCSS('appearance', 'base-select', { timeout: 3000 });
   await accounts.click();

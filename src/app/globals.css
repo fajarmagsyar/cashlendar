@@ -276,3 +276,21 @@ body:has(.view-loading) .navigation-progress{display:none}
 .export-progress small{font-size:12px;color:var(--muted);overflow-wrap:anywhere;max-width:100%}
 @media(min-width:761px){.app-header .brand{font-size:18px;font-weight:500}.app-header .brand-symbol{width:28px;height:28px;border-radius:8px}.app-header .brand-symbol svg{width:17px;height:17px}}
 @media(max-width:760px){.app-header{min-height:58px}}
+
+/* Use the app's pressed states instead of the browser's blue tap flash. */
+*{-webkit-tap-highlight-color:transparent}
+.avatar{position:relative;overflow:hidden}
+.avatar-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.glass-navigation .nav-avatar{width:24px;height:24px;font-size:11px;border:1px solid #b7c9bb}
+.glass-navigation a.active .nav-avatar{border-color:var(--green)}
+@media(max-width:760px){
+  .app-header{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top)) 16px 8px;min-height:64px}
+  .app-header .brand{grid-column:2;grid-row:1;justify-self:center}
+  .app-header .header-user{display:flex;grid-column:1;grid-row:1;align-items:center;justify-content:center;width:44px;height:44px;margin:0}
+  .app-header .header-user>span:last-child{display:none}
+  .app-header .header-user .avatar{width:30px;height:30px;font-size:13px;border:1px solid #d2ddd3}
+  .app-header .install-button{position:static;grid-column:3;grid-row:1;margin:0;justify-self:end;background:var(--green-soft);border-radius:12px}
+  .app-header .brand{font-size:20px}
+  .board-heading-actions{gap:6px}
+  .board-heading-actions .button.primary{padding:10px 12px;font-size:12px;gap:4px}
+}

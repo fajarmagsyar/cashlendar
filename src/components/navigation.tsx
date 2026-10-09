@@ -9,11 +9,12 @@ import {EntryButton} from '@/features/finance/entry-dialog';
 import {todayJakarta,validDate,getMonthRange} from '@/lib/finance/dates';
 import type {Account,Category} from '@/lib/finance/types';
 import {isNestedRoute} from '@/lib/navigation-motion';
+import {ProfileAvatar} from './profile-avatar';
 const links:{href:string;name:string;icon:IconName}[]=[
   {href:'/',name:'Money',icon:'calendar'},
   {href:'/accounts',name:'Accounts',icon:'wallet'},{href:'/more',name:'More',icon:'tools'},{href:'/profile',name:'Profile',icon:'profile'}
 ];
-export function Navigation({accounts,categories}:{accounts:Account[];categories:Category[]}) {
+export function Navigation({accounts,categories,profile}:{accounts:Account[];categories:Category[];profile:{name:string;photoUrl:string}}) {
   const {t}=useI18n();
   const path=usePathname(),router=useRouter(),params=useSearchParams();
   const [pending,startTransition]=useTransition();
@@ -41,14 +42,14 @@ export function Navigation({accounts,categories}:{accounts:Account[];categories:
   return <>
     <nav aria-label={t("Main navigation")} className="navigation glass-navigation desktop-navigation" style={{'--active-index':desktopIndex} as CSSProperties}>
       <span className="navigation-indicator" aria-hidden="true"/>
-      {links.map((link,index)=><Link key={link.href} href={link.href} prefetch={true} onNavigate={event=>navigate(event,link.href)} className={desktopIndex===index ? 'active' : ''} aria-current={active(link) ? 'page' : undefined}><Icon name={link.icon}/><span>{t(link.name)}</span></Link>)}
+      {links.map((link,index)=><Link key={link.href} href={link.href} prefetch={true} onNavigate={event=>navigate(event,link.href)} className={desktopIndex===index ? 'active' : ''} aria-current={active(link) ? 'page' : undefined}>{link.href==='/profile' ? <ProfileAvatar name={profile.name} photoUrl={profile.photoUrl} className="nav-avatar"/> : <Icon name={link.icon}/>}<span>{t(link.name)}</span></Link>)}
     </nav>
     <nav aria-label={t("Main navigation")} className="navigation glass-navigation mobile-navigation" style={{'--active-index':mobileIndex} as CSSProperties}>
       <span className="navigation-indicator" aria-hidden="true"/>
       <Link href="/" prefetch={true} onNavigate={event=>navigate(event,'/')} className={mobileIndex===0 ? 'active' : ''} aria-current={path==='/' ? 'page' : undefined}><Icon name="calendar"/><span>{t("Money")}</span></Link>
       <Link href="/accounts" prefetch={true} onNavigate={event=>navigate(event,'/accounts')} className={mobileIndex===1 ? 'active' : ''} aria-current={path==='/accounts' ? 'page' : undefined}><Icon name="wallet"/><span>{t("Accounts")}</span></Link>
       <EntryButton accounts={accounts} categories={categories} date={date} iconOnly className="nav-add"/>
-      {links.slice(2).map((link,index)=><Link key={link.href} href={link.href} prefetch={true} onNavigate={event=>navigate(event,link.href)} className={mobileIndex===index+3 ? 'active' : ''} aria-current={active(link) ? 'page' : undefined}><Icon name={link.icon}/><span>{t(link.name)}</span></Link>)}
+      {links.slice(2).map((link,index)=><Link key={link.href} href={link.href} prefetch={true} onNavigate={event=>navigate(event,link.href)} className={mobileIndex===index+3 ? 'active' : ''} aria-current={active(link) ? 'page' : undefined}>{link.href==='/profile' ? <ProfileAvatar name={profile.name} photoUrl={profile.photoUrl} className="nav-avatar"/> : <Icon name={link.icon}/>}<span>{t(link.name)}</span></Link>)}
     </nav>
     <NavigationProgress pending={pending}/>
   </>;

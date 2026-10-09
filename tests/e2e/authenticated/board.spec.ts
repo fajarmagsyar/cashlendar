@@ -27,7 +27,7 @@ test('More opens family tools with the dock hidden inside Savings and the board'
 test('one full-page editor combines formatting, tasks, formulas, drawing and reminders for the family',async({page,context,request},testInfo)=>{
   const viewport=page.viewportSize()!;
   await page.goto('/board');
-  await page.getByRole('link',{name:'New page',exact:true}).first().click();
+  await page.getByRole('link',{name:'Add note',exact:true}).first().click();
   await expect(page.getByRole('heading',{name:'New page',exact:true})).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('navigation',{name:'Main navigation'})).toHaveCount(0);
@@ -131,13 +131,13 @@ test('the tools and full-page editor use Indonesian by default',async({page,cont
   await context.addCookies([{name:session.cookieName,value:session.cookieValue,domain:'localhost',path:'/'}]);await page.goto('/more');
   await expect(page.getByRole('heading',{name:'Lainnya',exact:true})).toBeVisible();await page.getByRole('link',{name:/^Catatan Kulkas/}).click();
   await expect(page.getByRole('heading',{name:'Catatan Kulkas',exact:true})).toBeVisible();
-  await page.getByRole('link',{name:'Halaman baru',exact:true}).first().click();
+  await page.getByRole('link',{name:'Tambah catatan',exact:true}).first().click();
   await expect(page.getByLabel('Judul',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Daftar tugas',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Tabel',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Gambar',exact:true})).toBeVisible();
 });
 
 test('a newer family edit is preserved and the older full-page draft stays available',async({page,context,request})=>{
-  await page.goto('/board');await page.getByRole('link',{name:'New page',exact:true}).first().click();await page.getByLabel('Title',{exact:true}).fill('Shared draft');await page.getByLabel('Text block 1').fill('Original');
+  await page.goto('/board');await page.getByRole('link',{name:'Add note',exact:true}).first().click();await page.getByLabel('Title',{exact:true}).fill('Shared draft');await page.getByLabel('Text block 1').fill('Original');
   await page.getByRole('button',{name:'Save page',exact:true}).click();await expect(page).toHaveURL('/board');
   await page.getByRole('article',{name:'Shared draft'}).getByRole('link',{name:'Edit',exact:true}).click();await expect(page.getByRole('heading',{name:'Edit page',exact:true})).toBeVisible();await page.getByLabel('Text block 1').fill('My older draft');await expect(page.getByLabel('Text block 1')).toHaveValue('My older draft');
   const second=await context.newPage();await second.goto('/board');await second.getByRole('article',{name:'Shared draft'}).getByRole('link',{name:'Edit',exact:true}).click();await expect(second.getByRole('heading',{name:'Edit page',exact:true})).toBeVisible();

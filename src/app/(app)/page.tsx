@@ -15,7 +15,8 @@ import { dayLabel,todayJakarta,validDate } from '@/lib/finance/dates';
 export default async function Calendar({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}) {
   const {t,locale}=await getTranslations();
   const params=await searchParams;
-  const filters=readFilters(params);
+  const requested=readFilters(params);
+  const filters=requested.view==='calendar' ? {...requested,account:'',category:'',kind:'',search:''} : requested;
   const selected=typeof params.day==='string' && validDate(params.day) && params.day.slice(0,7)===filters.month ? params.day : (filters.month===todayJakarta().slice(0,7) ? todayJakarta() : `${filters.month}-01`);
   const dayPage=Math.max(1,Number.parseInt(String(params.daypage || '1')) || 1);
   const view=filters.view || 'calendar';

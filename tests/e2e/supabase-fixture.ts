@@ -34,8 +34,8 @@ select $1,$2,$3,'expense',1000,'2026-01-05','Fixture expense '||g from generate_
 await db.query(`insert into savings_goals(household_id,account_id,name,target_amount) values($1,$2,'Emergency fund',2000000)`,[household,savings]);
 
 const encode = (value:unknown)=>Buffer.from(JSON.stringify(value)).toString('base64url');
-function token(id:string,asymmetric=false){
-  const unsigned=`${encode(asymmetric ? {alg:'ES256',typ:'JWT',kid:'fixture-ec'} : {alg:'HS256',typ:'JWT'})}.${encode({sub:id,email:users[id].email,role:'authenticated',aud:'authenticated',exp:Math.floor(Date.now()/1000)+86400,iat:Math.floor(Date.now()/1000),iss:'http://127.0.0.1:54329/auth/v1'})}`;
+function token(id:string,asymmetric=false,photo=false){
+  const unsigned=`${encode(asymmetric ? {alg:'ES256',typ:'JWT',kid:'fixture-ec'} : {alg:'HS256',typ:'JWT'})}.${encode({sub:id,email:users[id].email,user_metadata:{...users[id].user_metadata,...(photo ? {avatar_url:'https://example.test/avatar.svg'} : {})},role:'authenticated',aud:'authenticated',exp:Math.floor(Date.now()/1000)+86400,iat:Math.floor(Date.now()/1000),iss:'http://127.0.0.1:54329/auth/v1'})}`;
   const signature=asymmetric ? sign('sha256',Buffer.from(unsigned),{key:signingKeys.privateKey,dsaEncoding:'ieee-p1363'}) : createHmac('sha256',secret).update(unsigned).digest();
   return `${unsigned}.${signature.toString('base64url')}`;
 }
@@ -74,11 +74,13 @@ createServer(async(req,res)=>{
     requestCounts={};
     requestDelay=0;
     await db.exec(`update profiles set display_name='Test Owner' where id='${owner}';update profiles set display_name='Test Member' where id='${member}';delete from board_items;delete from push_subscriptions;delete from planned_expenses;delete from transfers;delete from transactions where note not like 'Fixture expense %';delete from savings_goals where name<>'Emergency fund';delete from accounts where id not in ('${cash}','${savings}');delete from categories where name like 'Browser category%';`);
+    if(url.searchParams.get('emptySavings')==='1') await db.exec('delete from savings_goals');
+    else await db.query(`insert into savings_goals(household_id,account_id,name,target_amount) select $1,$2,'Emergency fund',2000000 where not exists(select 1 from savings_goals where name='Emergency fund')`,[household,savings]);
     send(200,{reset:true});return;
   }
   if(url.pathname==='/test/session'){
     const id=url.searchParams.get('member')==='1' ? member : owner;
-    const session={access_token:token(id,url.searchParams.get('asymmetric')==='1'),refresh_token:'test-refresh',expires_at:Math.floor(Date.now()/1000)+86400,expires_in:86400,token_type:'bearer',user:users[id]};
+    const session={access_token:token(id,url.searchParams.get('asymmetric')==='1',url.searchParams.get('photo')==='1'),refresh_token:'test-refresh',expires_at:Math.floor(Date.now()/1000)+86400,expires_in:86400,token_type:'bearer',user:users[id]};
     send(200,{cookieName:'sb-127-auth-token',cookieValue:`base64-${encode(session)}`});return;
   }
   const user=identity(req.headers.authorization);

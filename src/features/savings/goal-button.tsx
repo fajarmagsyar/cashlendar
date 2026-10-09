@@ -15,8 +15,8 @@ export function GoalButton({ accounts,goal }: { accounts:Account[]; goal?:Saving
   const eligible = accounts.filter(a=>a.type==='savings' && !a.archived_at);
   return (
     <>
-      <button className={goal ? 'text-button' : 'button primary'} disabled={!eligible.length} onClick={() => setOpen(true)}>
-        {!goal && <Icon name="plus" size={18} />} {goal ? t("Edit goal") : t("Create savings goal")}
+      <button className={goal ? 'text-button' : 'button primary'} aria-label={goal ? t("Edit goal") : t("Create savings goal")} disabled={!eligible.length} onClick={() => setOpen(true)}>
+        {!goal && <Icon name="plus" size={18} />} {goal ? t("Edit goal") : t("Savings")}
       </button>
       {open && (
         <Dialog title={goal ? t("Edit savings goal") : t("Create savings goal")} onClose={() => setOpen(false)}>

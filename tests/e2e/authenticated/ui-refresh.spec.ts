@@ -8,7 +8,7 @@ test.beforeEach(async({context,request})=>{
 test('note editor uses a compact title and a floating save action',async({page})=>{
   await page.goto('/board');
   await expect(page.locator('.fridge-empty')).toHaveText('Belum ada');
-  await page.getByRole('link',{name:'Halaman baru',exact:true}).click();
+  await page.getByRole('link',{name:'Tambah catatan',exact:true}).click();
   const title=page.getByRole('textbox',{name:'Judul',exact:true});
   await expect(title).toHaveAttribute('placeholder','Judul');
   expect(await title.evaluate(element=>parseFloat(getComputedStyle(element).fontSize))).toBeLessThanOrEqual(20);
@@ -78,7 +78,7 @@ test('accounts, settings, chart, exports and fridge notes work at all widths',as
   await expect(page.getByRole('navigation').filter({visible:true})).toBeVisible();
   await page.goto('/board');
   await expect(page.getByRole('heading',{name:'Catatan Kulkas',exact:true})).toBeVisible();
-  await expect(page.getByRole('link',{name:'Halaman baru',exact:true})).toHaveCount(1);
+  await expect(page.getByRole('link',{name:'Tambah catatan',exact:true})).toHaveCount(1);
   await expect(page.locator('.phone-notifications')).not.toHaveAttribute('open');
   await page.locator('.phone-notifications summary').click();
   await expect(page.locator('.phone-notifications')).toHaveAttribute('open','');

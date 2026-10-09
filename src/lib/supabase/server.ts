@@ -22,7 +22,8 @@ const getVerifiedIdentity = cache(async () => {
   const supabase = await getServerSupabase();
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data?.claims.sub) return null;
-  return { supabase, user:{ id:data.claims.sub, email:typeof data.claims.email === 'string' ? data.claims.email : '' } };
+  const metadata=data.claims.user_metadata;
+  return { supabase, user:{ id:data.claims.sub, email:typeof data.claims.email === 'string' ? data.claims.email : '',user_metadata:metadata && typeof metadata==='object' && !Array.isArray(metadata) ? metadata as Record<string,unknown> : {} } };
 });
 export async function requireUser(next = '/') {
   if (!supabaseConfig()) redirect('/login');
