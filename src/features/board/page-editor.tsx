@@ -49,11 +49,11 @@ export function BoardPageEditor({item:incomingItem,initialDocument}:{item?:Board
   }
   function back(){if(!dirty || window.confirm(t('Leave without saving your changes?'))){router.push('/board');router.refresh();}}
   return <section className="board-editor" aria-label={t(item ? 'Edit page' : 'New page')}>
-    <div className="page-editor-heading"><EditorAction label="Family board" icon="left" onClick={back} disabled={pending || !ready}/><h1>{t(item ? 'Edit page' : 'New page')}</h1><span className="sr-only" role="status">{t(dirty ? 'Unsaved changes' : 'Shared with your family')}</span><EditorAction label={pending ? 'Saving…' : 'Save page'} icon="save" type="submit" form="board-page-form" className="editor-save" disabled={pending || !ready}>{pending ? <LoadingAnimation/> : undefined}</EditorAction></div>
+    <div className="page-editor-heading"><EditorAction label="Family board" icon="left" onClick={back} disabled={pending || !ready}/><h1>{t(item ? 'Edit page' : 'New page')}</h1><span className="sr-only" role="status">{t(dirty ? 'Unsaved changes' : 'Shared with your family')}</span></div>
     <ActionForm showSubmit={false} disabled={!ready} id="board-page-form" className="page-editor-form" action={saveBoardDocument} onPendingChange={setPending} onSuccess={()=>{setDirty(false);saved('Board item saved.');router.push('/board');}}>
       {item && <><input type="hidden" name="id" value={item.id}/><input type="hidden" name="version" value={item.version}/></>}
       <input type="hidden" name="document" value={JSON.stringify(doc)}/>
-      <Field label="Title"><input className="page-title-input" name="title" required maxLength={120} defaultValue={item?.title} placeholder={t('Give this page a title')} onChange={()=>setDirty(true)}/></Field>
+      <Field label="Title"><input className="page-title-input" name="title" required maxLength={120} defaultValue={item?.title} placeholder={t('Title')} onChange={()=>setDirty(true)}/></Field>
       <div className="page-blocks">{doc.blocks.map((block,index)=><section className={`page-block block-${block.type}`} id={`block-${block.id}`} key={block.id} aria-label={t('Block {number}',{number:index+1})}>
         <div className="block-controls"><Icon name={block.type==='drawing' ? 'pen' : block.type}/><div>
           <EditorAction label={t('Move block {number} up',{number:index+1})} icon="up" disabled={index===0} onClick={()=>move(index,-1)}/><EditorAction label={t('Move block {number} down',{number:index+1})} icon="down" disabled={index===doc.blocks.length-1} onClick={()=>move(index,1)}/><EditorAction label={t('Remove block {number}',{number:index+1})} icon="trash" onClick={()=>remove(block)}/>
@@ -66,5 +66,6 @@ export function BoardPageEditor({item:incomingItem,initialDocument}:{item?:Board
       <div className="add-block-tools" role="group" aria-label={t('Add content')}>{(['text','checklist','table','drawing'] as const).map(type=><EditorAction key={type} label={{text:'Text',checklist:'Checklist',table:'Table',drawing:'Drawing'}[type]} icon={type==='drawing' ? 'pen' : type as IconName} disabled={doc.blocks.length>=50} onClick={()=>add(type)}/>)}<EditorAction label="Add a reminder" icon="bell" aria-pressed={reminder} onClick={()=>{setReminder(!reminder);setDirty(true);}}/></div>
       {reminder && <div className="page-reminder-settings"><div className="form-row" onChange={()=>setDirty(true)}><Field label="Date"><DatePicker name="date" onChange={()=>setDirty(true)} defaultValue={due.slice(0,10) || todayJakarta()} required/></Field><Field label="Time"><input name="time" type="time" required defaultValue={due.slice(11,16) || '09:00'}/></Field></div></div>}
     </ActionForm>
+    <EditorAction label={pending ? 'Saving…' : 'Save page'} icon="save" type="submit" form="board-page-form" className="editor-save" disabled={pending || !ready}>{pending ? <LoadingAnimation/> : undefined}</EditorAction>
   </section>;
 }

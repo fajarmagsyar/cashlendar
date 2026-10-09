@@ -29,7 +29,7 @@ export function FamilyBoard({items,authors,pushReady}:{items:BoardItem[];authors
     <PhoneNotifications configured={pushReady}/>
     {items.length>0 && <div className="board-toolbar"><label className="board-search"><span className="sr-only">{t('Search pages')}</span><input type="search" value={search} onChange={event=>setSearch(event.target.value)} placeholder={t('Search pages')}/></label></div>}
     {visible.length ? <section className="board-grid" aria-label={t('Shared board items')}>{visible.map(item=><BoardCard key={item.id} item={item} author={authors[item.updated_by] || t('Former member')}/>)}</section>
-      : <section className="fridge-empty"><Icon name="board" size={28}/><p>{t(items.length ? 'No matching notes.' : 'No notes yet. Tap + to add one.')}</p></section>}
+      : <section className="fridge-empty"><p>{t(items.length ? 'No matching notes.' : 'Nothing yet')}</p></section>}
   </>;
 }
 

@@ -4,6 +4,47 @@ test.beforeEach(async({context,request})=>{
   const session=await (await request.get('http://127.0.0.1:54329/test/session')).json();
   await context.addCookies([{name:'cashlendar-language',value:'id',domain:'localhost',path:'/'},{name:session.cookieName,value:session.cookieValue,domain:'localhost',path:'/'}]);
 });
+
+test('note editor uses a compact title and a floating save action',async({page})=>{
+  await page.goto('/board');
+  await expect(page.locator('.fridge-empty')).toHaveText('Belum ada');
+  await page.getByRole('link',{name:'Halaman baru',exact:true}).click();
+  const title=page.getByRole('textbox',{name:'Judul',exact:true});
+  await expect(title).toHaveAttribute('placeholder','Judul');
+  expect(await title.evaluate(element=>parseFloat(getComputedStyle(element).fontSize))).toBeLessThanOrEqual(20);
+  const save=page.getByRole('button',{name:'Simpan halaman',exact:true});
+  await expect(save).toHaveCSS('position','fixed');
+  const box=await save.boundingBox(),viewport=page.viewportSize()!;
+  expect(viewport.width-box!.x-box!.width).toBeLessThanOrEqual(32);
+  expect(viewport.height-box!.y-box!.height).toBeLessThanOrEqual(56);
+  await title.fill('Browser note');
+  await page.getByLabel('Teks bagian 1').fill('Catatan singkat.');
+  await save.click();
+  await expect(page).toHaveURL('/board');
+  await expect(page.getByRole('article',{name:'Browser note'})).toBeVisible();
+  await page.setViewportSize({width:390,height:850});
+  expect(await page.locator('.app-header .brand').evaluate(element=>parseFloat(getComputedStyle(element).fontSize))).toBeLessThanOrEqual(21);
+});
+
+test('export shows a focused loading state while preparing the selected format',async({page})=>{
+  await page.goto('/?month=2026-01');
+  let release!:()=>void;
+  const held=new Promise<void>(resolve=>{release=resolve;});
+  await page.route('**/api/export?**',async route=>{await held;await route.continue();});
+  await page.getByRole('button',{name:'Ekspor',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  const download=page.waitForEvent('download');
+  await dialog.getByRole('button',{name:/PDF/}).click();
+  try {
+    const status=dialog.getByRole('status');
+    await expect(status).toContainText('PDF');
+    await expect(status.locator('.loading-animation')).toBeVisible();
+    await expect(dialog.locator('.export-options')).toHaveCount(0);
+    await expect(dialog.getByRole('button',{name:'Tutup dialog'})).toBeDisabled();
+  } finally {release();}
+  expect((await download).suggestedFilename()).toBe('cashlendar-2026-01.pdf');
+  await expect(dialog).toHaveCount(0);
+});
 test('accounts, settings, chart, exports and fridge notes work at all widths',async({page},testInfo)=>{
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('/?month=2026-01&view=charts');
@@ -59,15 +100,35 @@ test('accounts, settings, chart, exports and fridge notes work at all widths',as
 
 test('page movement follows tab position and reverses nested navigation',async({page})=>{
   await page.goto('/');
+  const dock=page.getByRole('navigation').filter({visible:true});
+  await expect(dock).toHaveCSS('view-transition-name','app-navigation');
+  const dockPosition=await dock.boundingBox();
   await page.evaluate(()=>{
     const recorded:string[]=[];
+    const dockFrames:string[]=[];
+    (window as unknown as {dockFrames:string[]}).dockFrames=dockFrames;
     (window as unknown as {motionNames:string[]}).motionNames=recorded;
-    function sample(){for(const animation of document.getAnimations()) if(animation instanceof CSSAnimation && !recorded.includes(animation.animationName)) recorded.push(animation.animationName);requestAnimationFrame(sample);}
+    function sample(){
+      for(const animation of document.getAnimations()) if(animation instanceof CSSAnimation) {
+        if(!recorded.includes(animation.animationName)) recorded.push(animation.animationName);
+        if(animation.animationName==='page-in-right') {
+          const snapshot=getComputedStyle(document.documentElement,'::view-transition-new(app-navigation)');
+          dockFrames.push(`${snapshot.animationName}/${snapshot.opacity}`);
+        }
+      }
+      requestAnimationFrame(sample);
+    }
     requestAnimationFrame(sample);
   });
   await page.getByRole('navigation').filter({visible:true}).getByRole('link',{name:'Akun',exact:true}).click();
   await expect(page.locator('.route-page')).toHaveAttribute('data-motion','slide-left');
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {motionNames:string[]}).motionNames)).toContain('page-in-right');
+  await expect(dock).toBeVisible();
+  expect(await page.evaluate(()=>getComputedStyle(document.documentElement,'::view-transition-new(app-navigation)').animationName)).toBe('none');
+  const frames=await page.evaluate(()=>(window as unknown as {dockFrames:string[]}).dockFrames);
+  expect(frames.length).toBeGreaterThan(0);
+  expect(frames.every(frame=>frame==='none/1')).toBe(true);
+  expect(await dock.boundingBox()).toEqual(dockPosition);
   await page.getByRole('navigation').filter({visible:true}).getByRole('link',{name:'Profil',exact:true}).click();
   await page.getByRole('link',{name:'Pengaturan',exact:true}).click();
   await expect(page.locator('.route-page')).toHaveAttribute('data-motion','zoom-in');

@@ -465,5 +465,7 @@
   "Total expenses": "Total pengeluaran",
   "Export": "Ekspor",
   "Excel": "Excel",
-  "More filters": "Filter lainnya"
+  "More filters": "Filter lainnya",
+  "Nothing yet": "Belum ada",
+  "Preparing {format}…": "Menyiapkan {format}…"
 }

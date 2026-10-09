@@ -9,12 +9,12 @@
 .board-page-preview .drawing-canvas {max-height:150px}
 .app-shell:has(.board-editor) .app-header {display:none}
 .app-shell:has(.board-editor) .app-content {padding-bottom:24px}
-.board-editor {max-width:940px;margin:0 auto;padding:8px 0 36px}
+.board-editor {max-width:940px;margin:0 auto;padding:8px 0 96px}
 .page-editor-heading {position:sticky;top:0;z-index:6;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;font-size:.85rem}
 .page-editor-heading h1 {font-size:1rem;letter-spacing:0;margin:0 auto 0 0;color:var(--muted)}
 .page-editor-heading button {display:flex;align-items:center;gap:6px;min-height:44px}
 
-.page-editor-form input.page-title-input {font-size:clamp(1.5rem,4vw,2.4rem);font-weight:650;letter-spacing:-.025em;padding:14px!important}
+.page-editor-form input.page-title-input {font-size:18px;font-weight:500;letter-spacing:0;padding:10px 12px!important}
 .page-editor-form .form-fields>fieldset {display:flex;flex-direction:column;gap:24px;min-width:0}
 .page-blocks {display:flex;flex-direction:column;gap:18px;min-width:0}
 .page-block {border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;animation:board-block-in .18s ease-out both}
@@ -77,8 +77,8 @@
 .board-editor .editor-action:hover {background:var(--green-soft);color:var(--green)}
 .board-editor .editor-action:active {scale:.96}
 .board-editor .editor-action[aria-pressed=true] {background:var(--green-soft);color:var(--green);box-shadow:inset 0 0 0 1px #b5c8ba}
-.board-editor .editor-action.editor-save {background:var(--green);color:white;margin-left:auto}
-.board-editor .editor-save .loading-animation {width:22px;height:22px}
+.board-editor .editor-action.editor-save {position:fixed;right:calc(20px + env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom));z-index:40;width:56px;height:56px;border:0;border-radius:18px;background:var(--green);color:white;box-shadow:0 6px 18px #18352630;display:grid;place-items:center}
+.board-editor .editor-save .loading-animation {width:22px;height:22px;color:inherit}
 .page-editor-form> .form-fields>fieldset>.field:first-of-type>label {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 .block-controls {padding:2px 12px;background:transparent}
 .text-format-tools,.sheet-tools,.drawing-tools {gap:2px;padding:4px 10px}
