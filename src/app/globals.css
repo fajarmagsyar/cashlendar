@@ -294,3 +294,46 @@ body:has(.view-loading) .navigation-progress{display:none}
   .board-heading-actions{gap:6px}
   .board-heading-actions .button.primary{padding:10px 12px;font-size:12px;gap:4px}
 }
+
+:focus,:focus-visible{outline:none!important}
+.amount-control:has(input:focus-visible),.date-control:has(:focus-visible){outline:none!important}
+@media(max-width:760px){.app-header .header-user{display:none}}
+.wallet-overview{margin:8px 0 28px}
+.wallet-overview>div{display:flex;flex-direction:column;gap:4px}
+.wallet-overview span{font-size:12px;color:var(--muted)}
+.wallet-overview strong{font-size:clamp(26px,4vw,36px);letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.account-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:24px;max-width:1040px;padding:12px;margin:-12px -12px 0}
+.card-inspector{perspective:none;container-type:inline-size}
+.card-stage{perspective:1200px;touch-action:pan-y;cursor:grab;user-select:none;padding:8px 0}
+.card-stage:active{cursor:grabbing}
+.card-rotator{--light-x:30%;--light-y:15%;min-height:0;aspect-ratio:1.586;transition:transform .55s cubic-bezier(.2,.75,.2,1)}
+.card-rotator.is-dragging{transition:transform .08s linear}
+.card-rotator .account-card{padding:6cqw 7cqw;border-radius:5cqw;border:1px solid #ffffff38;box-shadow:0 16px 24px -12px #102e3d60,inset 0 1px 1px #ffffff70,inset 0 -1px 1px #00000055;background:radial-gradient(ellipse at var(--light-x) var(--light-y),#ffffff28,transparent 65%),linear-gradient(125deg,#ffffff0a 10%,#00000018 80%),var(--card-bg);isolation:isolate}
+.card-front{transform:translateZ(3px)}
+.card-back{transform:rotateY(180deg) translateZ(3px);gap:0}
+.card-edge{position:absolute;inset:0;border-radius:5cqw;background:#9ca69e;box-shadow:0 0 0 1px #6b766e;transform:translateZ(0);backface-visibility:hidden}
+.card-edge::before,.card-edge::after{content:"";position:absolute;inset:0;border-radius:inherit;background:#89938b;transform:translateZ(-1px)}
+.card-edge::after{transform:translateZ(1px)}
+.card-front::before{content:"";position:absolute;z-index:-1;inset:-45% -35%;border-radius:50%;border:1px solid #ffffff12;box-shadow:0 0 0 14px #ffffff04,0 0 0 15px #ffffff12,0 0 0 29px #ffffff03,0 0 0 30px #ffffff12,0 0 0 44px #ffffff03,0 0 0 45px #ffffff12,0 0 0 59px #ffffff03,0 0 0 60px #ffffff12;transform:translate(25%,25%) rotate(-30deg)}
+.account-card-top{display:flex;justify-content:space-between;align-items:center;margin:0 0 5cqw;min-height:24px}
+.card-wordmark{font-family:Georgia,'Times New Roman',serif;font-size:5.4cqw;font-weight:400;letter-spacing:-.7px;color:var(--card-text)}
+.card-chip{width:12cqw;height:9cqw;flex-shrink:0;border-radius:2cqw;background:linear-gradient(125deg,#b19755,#f8e9b6 35%,#c2a368 65%,#ecdcaa);border:1px solid #e8d597;box-shadow:inset 0 0 3px #fff9,0 1px 2px #0005;overflow:hidden}
+.card-chip svg{width:100%;height:100%;stroke:#7f6939;stroke-width:.75}
+.account-card .account-balance{font-family:'Courier New',monospace;font-size:7.4cqw;line-height:1.2;letter-spacing:-.5px;margin:4cqw 0 0;color:var(--card-text);text-shadow:0 1px 0 #ffffff35,0 -1px 1px #0009;font-weight:500;white-space:nowrap}
+.account-card .account-balance.expense-text{color:#ffcebb}
+.card-holder{display:flex;align-items:baseline;gap:12px;margin-top:auto;padding-right:32px}
+.card-holder h2{font-size:3.7cqw;text-transform:uppercase;letter-spacing:1.3px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-holder small{font-size:3.2cqw;margin-left:auto;white-space:nowrap}
+.card-flip{position:absolute;bottom:3.5cqw;right:3.5cqw;display:grid;place-items:center;width:36px;min-height:36px;height:36px;margin:0;padding:0;border-radius:50%;background:#ffffff0d;border:1px solid #ffffff25;transition:background .2s}
+.card-flip:hover{background:#ffffff25}
+.card-magnetic-strip{height:12cqw;margin:0 -7cqw 5cqw;background:linear-gradient(#131a18,#282c29 45%,#111a15);flex-shrink:0}
+.card-signature{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2cqw 3cqw;background:repeating-linear-gradient(0deg,#eae7db,#eae7db 2px,#d9d9ca 3px);color:#263b30;border-radius:2px}
+.card-signature h2{font-family:Georgia,serif;font-style:italic;font-size:4.4cqw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-signature span{font-size:2.6cqw;color:#617065}
+.card-back-balance{display:flex;flex-direction:column;gap:1cqw;margin-top:4cqw}
+.card-back-balance small{font-size:3.2cqw}
+.card-back-balance strong{font-size:6cqw;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.card-inspector-actions{padding:8px 4px;gap:20px}
+@media(prefers-reduced-motion:reduce){.card-rotator,.card-rotator.is-dragging{transition:none}.card-flip{transition:none}}
+
+.account-card-savings .account-balance.expense-text,.account-card.archived .account-balance.expense-text{color:var(--expense)}

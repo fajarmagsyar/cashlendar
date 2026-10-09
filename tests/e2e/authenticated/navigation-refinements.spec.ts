@@ -18,8 +18,8 @@ test('calendar omits filters, profile uses a photo and touch highlights are disa
   await expect.poll(()=>profile.locator('img').evaluate(image=>(image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   await expect(profile).toHaveCSS('-webkit-tap-highlight-color','rgba(0, 0, 0, 0)');
   await profile.focus();
-  await expect(profile).toHaveCSS('outline-style','solid');
-  await expect(page.locator('.app-header .header-user')).toBeVisible();
+  await expect(profile).toHaveCSS('outline-style','none');
+  await expect(page.locator('.app-header img')).toHaveCount(0);
   for(const width of [320,390,768,1440]) {
     await page.setViewportSize({width,height:850});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -55,4 +55,38 @@ test('savings and fridge notes share a quiet empty state and a labelled add acti
   }
   await page.locator('.page-heading a').click();
   await expect(page.getByRole('textbox',{name:'Judul',exact:true})).toBeVisible();
+});
+
+
+test('account cards can be dragged and flipped without losing account actions',async({page})=>{
+  await page.goto('/accounts');
+  const stage=page.locator('.card-stage').first();
+  const card=page.locator('.card-rotator').first();
+  await expect(stage).toBeVisible();
+  const bounds=await stage.boundingBox();
+  const x=bounds!.x+bounds!.width/2,y=bounds!.y+bounds!.height/2;
+  await page.mouse.move(x,y);
+  await page.mouse.down();
+  await page.mouse.move(x+85,y+5,{steps:8});
+  await expect(card).toHaveAttribute('style',/--tilt-y: 28deg/);
+  await page.mouse.up();
+  await expect(card).toHaveClass(/is-flipped/);
+  await card.locator('.card-back .card-flip').click();
+  await expect(card).not.toHaveClass(/is-flipped/);
+  if(test.info().project.name==='mobile') {
+    const touch=await page.context().newCDPSession(page);
+    await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+    await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+85,y:y+5}]});
+    await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    await expect(card).toHaveClass(/is-flipped/);
+    await card.locator('.card-back .card-flip').click();
+  }
+  await expect(page.locator('.card-inspector-actions').first()).toBeVisible();
+  for(const width of [320,390,768,1440]) {
+    await page.setViewportSize({width,height:850});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({width:390,height:850});
+  await page.mouse.move(0,0);
+  await page.screenshot({path:'/tmp/cashlendar-cards-'+test.info().project.name+'.png',fullPage:true});
 });
