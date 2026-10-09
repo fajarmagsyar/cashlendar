@@ -4,7 +4,7 @@ test('unconfigured app presents honest setup and contains the layout', async ({p
   const errors:string[] = [];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');
   await expect(page).toHaveURL(/\/login/);
-  await expect(page.getByRole('heading',{name:/Today’s spending/})).toBeVisible();
+  await expect(page.getByRole('heading',{name:/Your money/})).toBeVisible();
   await expect(page.getByText('Connect Supabase to get started')).toBeVisible();
   await expect(page.getByText('Continue with Google',{exact:true})).toHaveCount(0);
   for(const width of [320,390,768,1440]){
@@ -45,8 +45,9 @@ test('landing animation controls, Lottie illustrations and calendar demo work',a
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('/login');
   await expect(page.locator('.landing')).toHaveAttribute('data-motion-ready','true');
-  await expect(page.locator('.landing-description,.landing-eyebrow,.landing-detail-copy,.landing-login-note')).toHaveCount(0);
+  await expect(page.locator('.landing-eyebrow,.landing-detail-copy,.landing-login-note,.landing-scenes')).toHaveCount(0);
   await expect(page.locator('.landing-lottie>svg:not(.landing-lottie-fallback)')).toHaveCount(3);
+  if(test.info().project.name==='desktop') expect(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight)).toBe(true);
   await page.getByRole('button',{name:'Tue 22',exact:true}).click();
   await expect(page.locator('.preview-detail')).toContainText('Salary');
   await expect(page.locator('.preview-detail-amount')).toHaveText('+Rp 7.500.000');
@@ -60,7 +61,8 @@ test('landing animation controls, Lottie illustrations and calendar demo work',a
   await page.getByRole('button',{name:'Play animations'}).click();
   await expect(page.locator('.landing')).toHaveAttribute('data-motion-ready','true');
   await page.getByRole('button',{name:'Replay animation'}).click();
-  await page.locator('.landing-savings').scrollIntoViewIfNeeded();
+  await expect(page.locator('.landing-main>section')).toHaveCount(1);
+  await expect(page.locator('.landing-savings')).toBeVisible();
   await expect.poll(()=>page.locator('.preview-savings progress').evaluate(element=>(element as HTMLProgressElement).value)).toBe(40);
   for(const width of [320,390,768,1440]) {
     await page.setViewportSize({width,height:900});

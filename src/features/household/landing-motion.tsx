@@ -55,31 +55,54 @@ export function useLandingMotion(root:RefObject<HTMLDivElement|null>,playing:boo
     let removeVisibility:(()=>void)|undefined;
     const element=root.current;
     if(!element || !playing) return;
-    void Promise.all([import('gsap'),import('gsap/ScrollTrigger')]).then(([{gsap},{ScrollTrigger}])=>{
+    let removePointer:(()=>void)|undefined;
+    const preview=element.querySelector('.landing-preview');
+    void import('gsap').then(({gsap})=>{
       if(disposed) return;
-      gsap.registerPlugin(ScrollTrigger);
       context=gsap.context(()=>{
+        preview?.setAttribute('inert','');
         const entrance=gsap.timeline({defaults:{ease:'power3.out'}});
-        entrance.from('.landing-intro > :not(.landing-sign-in)',{y:26,opacity:0,duration:.8,stagger:.12})
-          .from('.landing-sign-in',{opacity:0,y:14,duration:.6},.5)
-          .from('.landing-preview',{rotationX:9,rotationY:-9,y:45,opacity:0,duration:1.2},.2)
-          .from('.preview-day',{y:14,opacity:0,stagger:.08,duration:.5},.65)
-          .from('.preview-entry',{scale:.85,opacity:0,stagger:.22,duration:.55},1.3)
-          .from('.preview-detail',{x:32,opacity:0,duration:.7},2.2)
-          .from('.landing-preview .landing-lottie',{scale:.7,opacity:0,duration:.7},2.1);
-        for(const section of element.querySelectorAll('.landing-details,.landing-savings')) {
-          gsap.from(section.querySelectorAll('figure'),{y:36,opacity:0,duration:.9,stagger:.16,scrollTrigger:{trigger:section,start:'top 85%',once:true}});
+        entrance.from('.landing-header',{y:-12,opacity:0,duration:.7})
+          .from('.landing-intro h1>*',{y:38,opacity:0,duration:1,stagger:.16},.15)
+          .from('.landing-subtitle,.landing-sign-in,.landing-product-line',{y:16,opacity:0,duration:.7,stagger:.12},.65)
+          .from('.landing-orbit-path',{strokeDashoffset:1,duration:2.5,ease:'power2.inOut'},.25)
+          .from('.landing-preview',{rotation:-9,y:75,opacity:0,duration:1.4},.4)
+          .from('.preview-day',{y:12,opacity:0,stagger:.075,duration:.5},1)
+          .from('.preview-entry',{scaleX:0,transformOrigin:'left',stagger:.1,duration:.6},1.5)
+          .from('.preview-detail',{x:22,opacity:0,duration:.7},1.8)
+          .from('.landing-chart-float',{x:-48,y:25,rotation:-8,opacity:0,duration:1.1},.9)
+          .from('.landing-savings-float',{x:36,y:48,rotation:11,opacity:0,duration:1.1},1.4)
+          .from('.landing-chart-line',{strokeDashoffset:1,duration:1.8,ease:'power2.inOut'},1.7)
+          .from('.landing-chart-dot',{scale:0,transformOrigin:'center',stagger:.08,duration:.4},2.5)
+          .from('.preview-savings progress',{attr:{value:0},duration:1.8,ease:'power2.inOut'},2)
+          .from('.landing-footer',{opacity:0,duration:.7},1.3)
+          .call(()=>preview?.removeAttribute('inert'),[],2.1);
+        gsap.to('.landing-chart-float',{y:-7,rotation:2,duration:3.5,yoyo:true,repeat:3,delay:3,ease:'sine.inOut'});
+        gsap.to('.landing-savings-float',{y:7,rotation:1,duration:4,yoyo:true,repeat:3,delay:3,ease:'sine.inOut'});
+        const assembly=element.querySelector('.landing-orbit');
+        const art=element.querySelector('.landing-art');
+        if(assembly && art) {
+          const x=gsap.quickTo(assembly,'y',{duration:.8,ease:'power3.out'});
+          const y=gsap.quickTo(assembly,'x',{duration:.8,ease:'power3.out'});
+          const move=(event:Event)=>{
+            const pointer=event as PointerEvent;
+            if(pointer.pointerType!=='mouse') return;
+            const rect=art.getBoundingClientRect();
+            x(-((pointer.clientY-rect.top)/rect.height-.5)*12);
+            y(((pointer.clientX-rect.left)/rect.width-.5)*16);
+          };
+          const reset=()=>{x(0);y(0);};
+          art.addEventListener('pointermove',move,{passive:true});
+          art.addEventListener('pointerleave',reset);
+          removePointer=()=>{art.removeEventListener('pointermove',move);art.removeEventListener('pointerleave',reset);};
         }
-        gsap.from('.landing-chart-line',{strokeDashoffset:1,duration:1.8,ease:'power2.inOut',scrollTrigger:{trigger:'.landing-chart-demo',start:'top 85%',once:true}});
-        gsap.from('.landing-chart-dot',{scale:0,transformOrigin:'center',stagger:.12,duration:.4,scrollTrigger:{trigger:'.landing-chart-demo',start:'top 75%',once:true}});
-        gsap.from('.preview-savings progress',{attr:{value:0},duration:2,ease:'power2.inOut',scrollTrigger:{trigger:'.preview-savings',start:'top 85%',once:true}});
       },element);
       element.dataset.motionReady='true';
       const visibility=()=>context?.getTweens().forEach((tween:gsap.core.Tween)=>document.hidden ? tween.pause() : tween.resume());
       document.addEventListener('visibilitychange',visibility);
       removeVisibility=()=>document.removeEventListener('visibilitychange',visibility);
     }).catch(()=>{element.dataset.motionReady='fallback';});
-    return ()=>{disposed=true;removeVisibility?.();context?.revert();delete element.dataset.motionReady;};
+    return ()=>{disposed=true;removePointer?.();removeVisibility?.();context?.revert();preview?.removeAttribute('inert');delete element.dataset.motionReady;};
   },[root,playing,replay]);
 }
 
